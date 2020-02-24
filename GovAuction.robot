@@ -3,7 +3,7 @@ Library  Selenium2Library
 Library  String
 Library  Collections
 Library  DateTime
-Library  tendergov_service.py
+Library  GovAuction_service.py
 
 *** Variables ***
 ${custom_acceleration}=  360
@@ -35,7 +35,7 @@ ${locator.plan.tender.procurementMethodType}=  xpath=//*[@data-test-id="procurem
 #  Open Browser  ${USERS.users['${username}'].homepage}  ${USERS.users['${username}'].browser}  alias=${username}  desired_capabilities= ${chromeOptions}
   Set Window Size  1024  10000
   Go To  ${USERS.users['${username}'].homepage}
-  Run Keyword If  '${username}' != 'tendergov_Viewer'  Run Keywords
+  Run Keyword If  '${username}' != 'GovAuction_Viewer'  Run Keywords
   ...  Login  ${username}
   ...  AND  Run Keyword And Ignore Error  Wait Until Keyword Succeeds  10 x  1 s  Закрити модалку з новинами  xpath=//button[@data-dismiss="modal"]
 
@@ -63,10 +63,10 @@ Login
   ${items}=  Get From Dictionary  ${tender_data.data}  items
   ${number_of_items}=  Get length  ${items}
   ${budget_amount}=  add_second_sign_after_point  ${tender_data.data.budget.amount}
-  ${tenderPeriod.startDate}=  convert_date_plan_tender_to_ tendergov_format  ${tender_data.data.tender.tenderPeriod.startDate}
-  ${budget.period.startDate}=  Run Keyword If  "closeFrameworkAgreementUA" in "${tender_data.data.tender.procurementMethodType}"  convert_date_plan_to_ tendergov_format_year  ${tender_data.data.budget.period.startDate}
+  ${tenderPeriod.startDate}=  convert_date_plan_tender_to_ GovAuction_format  ${tender_data.data.tender.tenderPeriod.startDate}
+  ${budget.period.startDate}=  Run Keyword If  "closeFrameworkAgreementUA" in "${tender_data.data.tender.procurementMethodType}"  convert_date_plan_to_ GovAuction_format_year  ${tender_data.data.budget.period.startDate}
   ...  ELSE  Set Variable  ${tender_data.data.budget.period.startDate}
-  ${budget.period.endDate}=  Run Keyword If  "closeFrameworkAgreementUA" in "${tender_data.data.tender.procurementMethodType}"  convert_date_plan_to_ tendergov_format_year  ${tender_data.data.budget.period.endDate}
+  ${budget.period.endDate}=  Run Keyword If  "closeFrameworkAgreementUA" in "${tender_data.data.tender.procurementMethodType}"  convert_date_plan_to_ GovAuction_format_year  ${tender_data.data.budget.period.endDate}
   ...  ELSE  Set Variable  ${tender_data.data.budget.period.endDate}
 
   ${is_visible}=  Run Keyword And Return Status  Element Should Be Visible  xpath=//*[@id="action-test-mode-msg"]
@@ -131,7 +131,7 @@ Add breakdown
 Add item plan
   [Arguments]  ${item_index}  ${item}
   ${quantity}=  Convert to string  ${item.quantity}
-  ${delivery_end_date}=  convert_date_plan_to_tendergov_format  ${item.deliveryDate.endDate}
+  ${delivery_end_date}=  convert_date_plan_to_GovAuction_format  ${item.deliveryDate.endDate}
   Wait until element is not visible  xpath=//div[@class="modal-backdrop fade"]
   Wait until element is not visible  xpath=//div[@id="mbody"]
   Дочекатися І Клікнути   xpath=//button[@class="mk-btn mk-btn_default add_item_plan"]
@@ -183,7 +183,7 @@ Add item plan
   ${text}=  Run Keyword If  "amount" in "${field_name}"  Convert To Number  ${text}
   ...  ELSE  Set Variable  ${text}
 
-  ${value}=  convert_string_from_dict_ tendergov  ${text}
+  ${value}=  convert_string_from_dict_ GovAuction  ${text}
   [Return]  ${value}
 
 
@@ -206,7 +206,7 @@ Get Info From Plan Items
 
 Внести зміни в план
   [Arguments]  ${username}  ${planID}  ${field_name}  ${value}
-  tendergov.Пошук плану по ідентифікатору  ${username}  ${planID}
+  GovAuction.Пошук плану по ідентифікатору  ${username}  ${planID}
   Дочекатися І Клікнути  xpath=//a[contains(text(),'Редагувати')]
   ${value}=  Run Keyword If  "budget.amount" in "${field_name}"  Convert To String  ${value}
   ...  ELSE  Set Variable  ${value}
@@ -218,9 +218,9 @@ Get Info From Plan Items
 
 Update plan budget.period
   [Arguments]  ${username}  ${planID}  ${field_name}  ${value}
-#  ${data}=  convert_date_plan_tender_to_ tendergov_format  ${value}
-  ${startDate}=  convert_date_plan_to_tendergov_format  ${value['startDate']}
-  ${endDate}=  convert_date_plan_to_tendergov_format  ${value['endDate']}
+#  ${data}=  convert_date_plan_tender_to_ GovAuction_format  ${value}
+  ${startDate}=  convert_date_plan_to_GovAuction_format  ${value['startDate']}
+  ${endDate}=  convert_date_plan_to_GovAuction_format  ${value['endDate']}
   Run Keyword If  "startDate" in "${value['startDate']}"  Execute Javascript  document.querySelector('[id="period-startdate"]').value="${startDate}}"
   ...  ELSE  Execute Javascript  document.querySelector('[id="period-enddate"]').value="${endDate}"
 
@@ -230,7 +230,7 @@ Update plan items info
   ${match_res}=  Get Regexp Matches  ${field_name}  \\[(\\d+)\\]  1
   ${index}=  Convert To Integer  ${match_res[0]}
   ${field_name}=  Remove String Using Regexp  ${field_name}  \\[(\\d+)\\]
-  ${data}=  Run Keyword If  "deliveryDate.endDate" in "${field_name}"  convert_date_plan_to_ tendergov_format  ${value}
+  ${data}=  Run Keyword If  "deliveryDate.endDate" in "${field_name}"  convert_date_plan_to_ GovAuction_format  ${value}
   Run Keyword If
   ...  "deliveryDate.endDate" in "${field_name}"  Execute Javascript  document.querySelector('[name="Plan[items][${index + 1}][deliveryDate][endDate]"]').value="${data}"
   ...  ELSE IF  "quantity" in "${field_name}"  Input text  xpath=//*[@name="Plan[items][${index + 1}][quantity]"]  ${value}
@@ -238,7 +238,7 @@ Update plan items info
 
 Видалити предмет закупівлі плану
   [Arguments]  ${username}  ${planID}  ${item_id}
-  tendergov.Пошук плану по ідентифікатору  ${username}  ${planID}
+  GovAuction.Пошук плану по ідентифікатору  ${username}  ${planID}
   Дочекатися І Клікнути  xpath=//a[contains(text(),'Редагувати')]
   Дочекатися І Клікнути  xpath=//textarea[contains(text(), "${item_id}")]/ancestor::div[@class="item"]/descendant::button[contains(@class, "delete_item")]
   Confirm Action
@@ -248,7 +248,7 @@ Update plan items info
 
 Додати предмет закупівлі в план
   [Arguments]  ${username}  ${planID}  ${item}
-  tendergov.Пошук плану по ідентифікатору  ${username}  ${planID}
+  GovAuction.Пошук плану по ідентифікатору  ${username}  ${planID}
   Дочекатися І Клікнути  xpath=//a[contains(text(),'Редагувати')]
   ${item_index}=  Get Matching Xpath Count  xpath=//button[contains(@class, "delete_item")]
   ${item_index}=  Convert To Integer   ${item_index}
@@ -301,7 +301,7 @@ Update plan items info
 #  Дочекатися І Клікнути  xpath=//a[@href="${host}/tenders/index"]
   Switch Browser  ${username}
   Wait Until Element Is Not Visible  xpath=//div[@class="modal-backdrop fade"]  10
-  tendergov.Пошук плану по ідентифікатору  ${username}  ${plan_uaid}
+  GovAuction.Пошук плану по ідентифікатору  ${username}  ${plan_uaid}
   Дочекатися І Клікнути  xpath=//*[@id="create_auction_modal_btn"]
   Wait Until Element Is Visible  xpath=(//*[@class="modal-content"])[last()]
   Run Keyword If  ${number_of_lots} > 0  Wait And Select From List By Value  name=tender_type  2
@@ -482,7 +482,7 @@ Add milestone_tender
   ${lots_length}=  Get Length  ${lots}
   :FOR  ${index}  IN RANGE  ${lots_length}
   \  Run Keyword if  ${index} != 0  Дочекатися І Клікнути  xpath=//button[contains(@class, "add_lot")]
-  \  tendergov.Створити лот  tendergov_Owner  ${None}  ${lots[${index}]}  ${tender_data}
+  \  GovAuction.Створити лот  GovAuction_Owner  ${None}  ${lots[${index}]}  ${tender_data}
 
 
 Створити лот
@@ -633,22 +633,22 @@ Add Item Tender
   \   Sleep  10
   \   Додати опцію   ${feature.enum[${index}]}   ${index}   ${feature_index}
 
-tendergov.Редагувати угоду
+GovAuction.Редагувати угоду
   [Arguments]  ${username}  ${tender_uaid}  ${contract_index}  ${fieldname}  ${fieldvalue}
-#tendergov.Пошук тендера по ідентифікатору  ${username}  ${tender_uaid}
+#GovAuction.Пошук тендера по ідентифікатору  ${username}  ${tender_uaid}
 #  Дочекатися І Клікнути  xpath=//div[@id="slidePanel"]/descendant::a[contains(@href,"tender/award")]
 #  Дочекатися І Клікнути  xpath=//button[@class="mk-btn mk-btn_default js-btn-contract-award"]
   Log  ${fieldvalue}
 
-tendergov.Встановити дату підписання угоди
+GovAuction.Встановити дату підписання угоди
   [Arguments]  ${username}  ${tender_uaid}  ${contract_index}  ${fieldvalue}
   Log  ${fieldvalue}
 
-tendergov.Вказати період дії угоди
+GovAuction.Вказати період дії угоди
   [Arguments]  ${username}  ${tender_uaid}  ${contract_index}  ${startDate}  ${endDate}
   Log  ${startDate}
 
-tendergov.Завантажити документ в угоду
+GovAuction.Завантажити документ в угоду
   [Arguments]  ${username}  ${path}  ${tender_uaid}  ${contract_index}  ${doc_type}=documents
 #  ${doc_type}=  Set Variable If  '${doc_type}' == 'None'  contractSigned  ${doc_type}
   Log  ${doc_type}
@@ -686,7 +686,7 @@ Get Last Feature Index
 Завантажити документ
   [Arguments]  ${username}  ${filepath}  ${tender_uaid}
   Switch Browser  ${username}
-  tendergov.Пошук тендера по ідентифікатору  ${username}  ${tender_uaid}
+  GovAuction.Пошук тендера по ідентифікатору  ${username}  ${tender_uaid}
   Дочекатися І Клікнути  xpath=//a[contains(text(),'Редагувати')]
   Scroll To Element  xpath=//*[@data-test-id="tender.documents.upload"]/descendant::input[@type="file"][last()]
   Choose File  xpath=//*[@data-test-id="tender.documents.upload"]/descendant::input[@type="file"][last()]  ${filepath}
@@ -753,17 +753,17 @@ Force agreement synchronization
 
 Оновити сторінку з тендером
   [Arguments]  ${username}  ${tenderID}
-  tendergov.Пошук тендера по ідентифікатору  ${username}  ${tenderID}
+  GovAuction.Пошук тендера по ідентифікатору  ${username}  ${tenderID}
 
-tendergov.Перевести тендер на статус очікування обробки мостом
+GovAuction.Перевести тендер на статус очікування обробки мостом
   [Arguments]  ${username}  ${tender_uaid}
-  tendergov.Пошук тендера по ідентифікатору  ${username}  ${tender_uaid}
+  GovAuction.Пошук тендера по ідентифікатору  ${username}  ${tender_uaid}
   Click Element  xpath=//*[@class="mk-btn mk-btn_danger"]/ancestor::div[@class="text-center"]
   Wait Until Keyword Succeeds  5x  1s   Page Should Contain  Очікування 2-го етапу
 
-tendergov.Отримати тендер другого етапу та зберегти його
+GovAuction.Отримати тендер другого етапу та зберегти його
   [Arguments]  ${username}  ${tender_uaid}
-  tendergov.Пошук тендера по ідентифікатору  ${username}  ${tender_uaid[0:-2]}
+  GovAuction.Пошук тендера по ідентифікатору  ${username}  ${tender_uaid[0:-2]}
 #  Capture Page Screenshot  filename=selenium-screenshot-{}.png
   Click Element  xpath=//*[@class="mk-btn mk-btn_accept"]
   Wait Until Keyword Succeeds  5x  10s   Run Keywords
@@ -773,12 +773,12 @@ tendergov.Отримати тендер другого етапу та збер�
 #  Click Element  xpath=//*[@name="stage2_active_tendering"]
 
 
-tendergov.Активувати другий етап
+GovAuction.Активувати другий етап
     [Arguments]  ${username}  ${tender_uaid}
-  tendergov.Отримати тендер другого етапу та зберегти його  ${username}  ${tender_uaid}
+  GovAuction.Отримати тендер другого етапу та зберегти його  ${username}  ${tender_uaid}
   Click Element  xpath=//*[@name="stage2_active_tendering"]
   Element Should Not Be Visible  xpath=//*[@class="alert-danger alert fade in active"]
-#tendergov.Пошук тендера по ідентифікатору  ${username}  ${tender_uaid[0:-2]}
+#GovAuction.Пошук тендера по ідентифікатору  ${username}  ${tender_uaid[0:-2]}
 #  Click Element  xpath=//*[@class="mk-btn mk-btn_accept"]
 #  Wait Until Keyword Succeeds  5x  1s   Page Should Contain  Чернетка 2-гий етап
 ##  Дочекатися І Клікнути  xpath=//a[contains(@href,"tender/update")]
@@ -798,7 +798,7 @@ tendergov.Активувати другий етап
   [Arguments]  ${username}  ${tenderID}  ${field_name}  ${field_value}
   ${field_value}=  Run Keyword If  "amount" in "${field_name}"  add_second_sign_after_point  ${field_value}
   ...  ELSE  Set Variable  ${field_value}
-  tendergov.Пошук тендера по ідентифікатору  ${username}  ${tenderID}
+  GovAuction.Пошук тендера по ідентифікатору  ${username}  ${tenderID}
   Дочекатися І Клікнути  xpath=//a[contains(text(),'Редагувати')]
   Run Keyword If  "Date" in "${field_name}"  Input Date  name="Tender[${field_name.replace(".", "][")}]"  ${field_value}
   ...  ELSE  Input text  name=Tender[${field_name}]  ${field_value}
@@ -809,7 +809,7 @@ tendergov.Активувати другий етап
   [Arguments]  ${username}  ${tender_uaid}  ${lot_id}  ${field_name}  ${field_value}
   ${field_value}=  Run Keyword If  "amount" in "${field_name}"  add_second_sign_after_point  ${field_value}
   ...  ELSE  Set Variable  ${field_value}
-  tendergov.Пошук тендера по ідентифікатору  ${username}  ${tender_uaid}
+  GovAuction.Пошук тендера по ідентифікатору  ${username}  ${tender_uaid}
   Дочекатися І Клікнути  xpath=//a[contains(text(),'Редагувати')]
   Input Text  xpath=(//input[contains(@value,"${lot_id}")]/ancestor::div[@class="lots_marker"]/descendant::*[contains(@name,"${field_name.replace(".", "][")}")])[1]  ${field_value}
   Дочекатися І Клікнути  xpath=//button[contains(@class,'btn_submit_form')]
@@ -817,7 +817,7 @@ tendergov.Активувати другий етап
 
 Завантажити документ в лот
   [Arguments]  ${username}  ${filepath}  ${tender_uaid}  ${lot_id}
-  tendergov.Пошук тендера по ідентифікатору  ${username}  ${tender_uaid}
+  GovAuction.Пошук тендера по ідентифікатору  ${username}  ${tender_uaid}
   Дочекатися І Клікнути  xpath=//a[contains(text(),'Редагувати')]
   Sleep  5  # !!Teprorary!! At slow environment or Chrome 59 + chromedriver 2.32, JS does not have time to index Inputs
   Wait Until Page Contains Element  xpath=//input[contains(@value,"${lot_id}")]/ancestor::div[@class="lots_marker"]/descendant::input[@type="file"][last()]
@@ -833,25 +833,25 @@ tendergov.Активувати другий етап
 
 Створити лот із предметом закупівлі
   [Arguments]  ${username}  ${tender_uaid}  ${lot}  ${item}
-  tendergov.Пошук тендера по ідентифікатору  ${username}  ${tender_uaid}
+  GovAuction.Пошук тендера по ідентифікатору  ${username}  ${tender_uaid}
   Дочекатися І Клікнути  xpath=//a[contains(text(),'Редагувати')]
   Дочекатися І Клікнути  xpath=//button[contains(@class, "add_lot")]
-tendergov.Створити лот  ${username}  ${tender_uaid}  ${lot}  ${item}
+GovAuction.Створити лот  ${username}  ${tender_uaid}  ${lot}  ${item}
   Дочекатися І Клікнути  xpath=//button[contains(@class,'btn_submit_form')]
   Wait Until Page Contains Element  xpath=//div[contains(@class, "alert-success")]
 
 Додати предмет закупівлі в лот
   [Arguments]  ${username}  ${tender_uaid}  ${lot_id}  ${item}
-  tendergov.Пошук тендера по ідентифікатору  ${username}  ${tender_uaid}
+  GovAuction.Пошук тендера по ідентифікатору  ${username}  ${tender_uaid}
   Дочекатися І Клікнути  xpath=//a[contains(text(),'Редагувати')]
   Дочекатися І Клікнути  xpath=//*[contains(@value, "${lot_id}")]/ancestor::div[@class="lot"]/descendant::button[contains(@class,"add_item")]
-  tendergov.Додати предмет  ${item}
+  GovAuction.Додати предмет  ${item}
   Дочекатися І Клікнути  xpath=//button[contains(@class,'btn_submit_form')]
   Wait Until Page Contains Element  xpath=//div[contains(@class, "alert-success")]
 
 Додати донора
   [Arguments]  ${username}  ${tender_uaid}  ${funders_data}
-  tendergov.Пошук тендера по ідентифікатору  ${username}  ${tender_uaid}
+  GovAuction.Пошук тендера по ідентифікатору  ${username}  ${tender_uaid}
   Дочекатися І Клікнути  xpath=//a[contains(text(),'Редагувати')]
   Click Element  id=funders-checkbox
   Wait And Select From List By Label  id=tender-funders  ${funders_data.name}
@@ -861,7 +861,7 @@ tendergov.Створити лот  ${username}  ${tender_uaid}  ${lot}  ${item}
 
 Додати неціновий показник на тендер
   [Arguments]  ${username}  ${tender_uaid}  ${feature}
-  tendergov.Пошук тендера по ідентифікатору  ${username}  ${tender_uaid}
+  GovAuction.Пошук тендера по ідентифікатору  ${username}  ${tender_uaid}
   Дочекатися І Клікнути  xpath=//a[contains(text(),'Редагувати')]
   Sleep  2
   Дочекатися І Клікнути   xpath=(//div[contains(@class,"features_wrapper")]/descendant::button[contains(@class, "add_feature")])[last()]
@@ -872,7 +872,7 @@ tendergov.Створити лот  ${username}  ${tender_uaid}  ${lot}  ${item}
 
 Додати неціновий показник на лот
   [Arguments]  ${username}  ${tender_uaid}  ${feature}  ${lot_id}
-  tendergov.Пошук тендера по ідентифікатору  ${username}  ${tender_uaid}
+  GovAuction.Пошук тендера по ідентифікатору  ${username}  ${tender_uaid}
   Дочекатися І Клікнути  xpath=//a[contains(text(),'Редагувати')]
   Sleep  3
   Дочекатися І Клікнути   xpath=(//input[contains(@value,"${lot_id}")]/ancestor::div[@class="lot"]/descendant::button[contains(@class, "add_feature")])[last()]
@@ -882,7 +882,7 @@ tendergov.Створити лот  ${username}  ${tender_uaid}  ${lot}  ${item}
 
 Додати неціновий показник на предмет
   [Arguments]  ${username}  ${tender_uaid}  ${feature}  ${item_id}
-  tendergov.Пошук тендера по ідентифікатору  ${username}  ${tender_uaid}
+  GovAuction.Пошук тендера по ідентифікатору  ${username}  ${tender_uaid}
   Дочекатися І Клікнути  xpath=//a[contains(text(),'Редагувати')]
   ${is_feature_added}=  Run Keyword And Return Status  Should Contain At Least One Feature
   Run Keyword If  ${is_feature_added}  Wait Until Keyword Succeeds  10 x  400 ms  Feature Count Should Not Be Zero
@@ -901,7 +901,7 @@ Feature Count Should Not Be Zero
 
 Створити постачальника, додати документацію і підтвердити його
   [Arguments]  ${username}  ${tender_uaid}  ${supplier_data}  ${document}
-  tendergov.Пошук тендера по ідентифікатору  ${username}  ${tender_uaid}
+  GovAuction.Пошук тендера по ідентифікатору  ${username}  ${tender_uaid}
   Дочекатися І Клікнути  xpath=//a[text()="Пропозиції"]
   Wait And Select From List By Label  name=Award[suppliers][0][address][countryName]  ${supplier_data.data.suppliers[0].address.countryName}
   Wait And Select From List By Value  name=Award[suppliers][0][identifier][scheme]  ${supplier_data.data.suppliers[0].identifier.scheme}
@@ -935,7 +935,7 @@ Feature Count Should Not Be Zero
 
 Видалити предмет закупівлі
   [Arguments]  ${username}  ${tender_uaid}  ${item_id}  ${lot_id}=${Empty}
-  tendergov.Пошук тендера по ідентифікатору  ${username}  ${tender_uaid}
+  GovAuction.Пошук тендера по ідентифікатору  ${username}  ${tender_uaid}
   Дочекатися І Клікнути  xpath=//a[contains(text(),'Редагувати')]
   Дочекатися І Клікнути  xpath=//textarea[contains(text(), "${item_id}")]/ancestor::div[@class="item"]/descendant::button[contains(@class, "delete_item")]
   Confirm Action
@@ -945,7 +945,7 @@ Feature Count Should Not Be Zero
 
 Видалити лот
   [Arguments]  ${username}  ${tender_uaid}  ${lot_id}
-  tendergov.Пошук тендера по ідентифікатору  ${username}  ${tender_uaid}
+  GovAuction.Пошук тендера по ідентифікатору  ${username}  ${tender_uaid}
   Дочекатися І Клікнути  xpath=//a[contains(text(),'Редагувати')]
   Sleep  3
   Дочекатися І Клікнути  xpath=//*[contains(@value, "${lot_id}")]/ancestor::div[@class="lot"]/descendant::button[contains(@class,"delete_lot")]
@@ -955,7 +955,7 @@ Feature Count Should Not Be Zero
 
 Видалити неціновий показник
   [Arguments]  ${username}  ${tender_uaid}  ${feature_id}
-  tendergov.Пошук тендера по ідентифікатору  ${username}  ${tender_uaid}
+  GovAuction.Пошук тендера по ідентифікатору  ${username}  ${tender_uaid}
   Дочекатися І Клікнути  xpath=//a[contains(text(),'Редагувати')]
   Sleep  3
   Дочекатися І Клікнути  xpath=//*[contains(@value, "${feature_id}")]/ancestor::div[@class="feature"]/descendant::button[contains(@class,"delete_feature")]
@@ -965,7 +965,7 @@ Feature Count Should Not Be Zero
 
 Видалити донора
   [Arguments]  ${username}  ${tender_uaid}  ${funders_index}
-  tendergov.Пошук тендера по ідентифікатору  ${username}  ${tender_uaid}
+  GovAuction.Пошук тендера по ідентифікатору  ${username}  ${tender_uaid}
   Дочекатися І Клікнути  xpath=//a[contains(text(),'Редагувати')]
   Sleep  3
   Дочекатися І Клікнути  xpath=//*[@id="funders-checkbox"]
@@ -978,7 +978,7 @@ Feature Count Should Not Be Zero
 
 Задати питання
   [Arguments]  ${username}  ${tender_uaid}  ${question}  ${related_to}=False
-  tendergov.Пошук тендера по ідентифікатору  ${username}  ${tender_uaid}
+  GovAuction.Пошук тендера по ідентифікатору  ${username}  ${tender_uaid}
   Дочекатися І Клікнути  xpath=//div[@id="slidePanel"]/descendant::a[contains(@href, "/questions")]
   Input Text  name=Question[title]  ${question.data.title}
   Input Text  name=Question[description]  ${question.data.description}
@@ -989,7 +989,7 @@ Feature Count Should Not Be Zero
 
 Відповісти на питання
   [Arguments]  ${username}  ${tender_uaid}  ${answer_data}  ${question_id}
-  tendergov.Пошук тендера по ідентифікатору  ${username}  ${tender_uaid}
+  GovAuction.Пошук тендера по ідентифікатору  ${username}  ${tender_uaid}
   Дочекатися І Клікнути  xpath=//div[@id="slidePanel"]/descendant::a[contains(@href, "/questions")]
   Toggle Sidebar
   Run Keyword And Ignore Error  Click Element  xpath=//button[@data-dismiss="modal"]
@@ -1021,7 +1021,7 @@ Feature Count Should Not Be Zero
 
 Створити вимогу про виправлення умов закупівлі
   [Arguments]  ${username}  ${tender_uaid}  ${claim}  ${document}=${None}  ${related_to}=Тендеру
-  tendergov.Пошук тендера по ідентифікатору  ${username}  ${tender_uaid}
+  GovAuction.Пошук тендера по ідентифікатору  ${username}  ${tender_uaid}
   Дочекатися І Клікнути  xpath=//div[@id="slidePanel"]/descendant::a[contains(@href, "/complaints")]
   Toggle Sidebar
   Wait Until Keyword Succeeds  10 x  400 ms  Run Keywords
@@ -1046,7 +1046,7 @@ Feature Count Should Not Be Zero
 
 Підтвердити вирішення вимоги про виправлення умов закупівлі
   [Arguments]  ${username}  ${tender_uaid}  ${complaintID}  ${confirmation_data}
-  tendergov.Пошук тендера по ідентифікатору  ${username}  ${tender_uaid}
+  GovAuction.Пошук тендера по ідентифікатору  ${username}  ${tender_uaid}
   Дочекатися І Клікнути  xpath=//div[@id="slidePanel"]/descendant::a[contains(@href, "/complaints")]
   Run Keyword If  ${confirmation_data.data.satisfied}  Дочекатися І Клікнути  xpath=//span[contains(text(),"${complaintID}")]/ancestor::div[@class="item-inf_txt"]/descendant::button[@name="complaint_resolved"]
   ...  ELSE  Дочекатися І Клікнути  xpath=//span[contains(text(),"${complaintID}")]/ancestor::div[@class="item-inf_txt"]/descendant::button[@name="claim_satisfied_false"]
@@ -1055,28 +1055,28 @@ Feature Count Should Not Be Zero
 
 Створити вимогу про виправлення умов лоту
   [Arguments]  ${username}  ${tender_uaid}  ${claim}  ${lot_id}  ${document}=${None}
-  ${complaintID}=  tendergov.Створити вимогу про виправлення умов закупівлі  ${username}  ${tender_uaid}  ${claim}  ${document}  ${lot_id}
+  ${complaintID}=  GovAuction.Створити вимогу про виправлення умов закупівлі  ${username}  ${tender_uaid}  ${claim}  ${document}  ${lot_id}
   [Return]  ${complaintID}
 
 Підтвердити вирішення вимоги про виправлення умов лоту
   [Arguments]  ${username}  ${tender_uaid}  ${complaintID}  ${confirmation_data}
-  tendergov.Підтвердити вирішення вимоги про виправлення умов закупівлі  ${username}  ${tender_uaid}  ${complaintID}  ${confirmation_data}
+  GovAuction.Підтвердити вирішення вимоги про виправлення умов закупівлі  ${username}  ${tender_uaid}  ${complaintID}  ${confirmation_data}
 
 Відповісти на вимогу про виправлення умов закупівлі
   [Arguments]  ${username}  ${tender_uaid}  ${complaintID}  ${answer_data}
-  tendergov.Відповісти на вимогу  ${username}  ${tender_uaid}  ${complaintID}  ${answer_data}
+  GovAuction.Відповісти на вимогу  ${username}  ${tender_uaid}  ${complaintID}  ${answer_data}
 
 Відповісти на вимогу про виправлення умов лоту
   [Arguments]  ${username}  ${tender_uaid}  ${complaintID}  ${answer_data}
-  tendergov.Відповісти на вимогу  ${username}  ${tender_uaid}  ${complaintID}  ${answer_data}
+  GovAuction.Відповісти на вимогу  ${username}  ${tender_uaid}  ${complaintID}  ${answer_data}
 
 Відповісти на вимогу про виправлення визначення переможця
   [Arguments]  ${username}  ${tender_uaid}  ${complaintID}  ${answer_data}  ${award_index}
-  tendergov.Відповісти на вимогу  ${username}  ${tender_uaid}  ${complaintID}  ${answer_data}
+  GovAuction.Відповісти на вимогу  ${username}  ${tender_uaid}  ${complaintID}  ${answer_data}
 
 Відповісти на вимогу
   [Arguments]  ${username}  ${tender_uaid}  ${complaintID}  ${answer_data}
-  tendergov.Пошук тендера по ідентифікатору  ${username}  ${tender_uaid}
+  GovAuction.Пошук тендера по ідентифікатору  ${username}  ${tender_uaid}
   Run Keyword If  "переможця" in "${TEST_NAME}"  Run Keywords
   ...    Дочекатися І Клікнути  xpath=//div[@id="slidePanel"]/descendant::a[contains(@href,"tender/award")]
   ...    AND  Дочекатися І Клікнути  xpath=//*[@class="page-panel"]/descendant::a[contains(@href,"tender/qualification-complaints")]
@@ -1096,12 +1096,12 @@ Feature Count Should Not Be Zero
 
 Створити чернетку вимоги про виправлення умов закупівлі
   [Arguments]  ${username}  ${tender_uaid}  ${claim}
-  ${complaint_id}=tendergov.Створити вимогу про виправлення умов закупівлі  ${username}  ${tender_uaid}  ${claim}
+  ${complaint_id}=GovAuction.Створити вимогу про виправлення умов закупівлі  ${username}  ${tender_uaid}  ${claim}
   [Return]  ${complaint_id}
 
 Скасувати вимогу про виправлення умов закупівлі
   [Arguments]  ${username}  ${tender_uaid}  ${complaintID}  ${cancellation_data}
-  tendergov.Пошук тендера по ідентифікатору  ${username}  ${tender_uaid}
+  GovAuction.Пошук тендера по ідентифікатору  ${username}  ${tender_uaid}
   Дочекатися І Клікнути  xpath=//div[@id="slidePanel"]/descendant::a[contains(@href, "/complaints")]
   Дочекатися І Клікнути  xpath=//input[@class="cancel_checkbox"]/..
   Ввести Текст  xpath=//*[contains(@name, "[cancellationReason]")]  ${cancellation_data.data.cancellationReason}
@@ -1110,16 +1110,16 @@ Feature Count Should Not Be Zero
 
 Створити чернетку вимоги про виправлення умов лоту
   [Arguments]  ${username}  ${tender_uaid}  ${claim}  ${lot_id}
-  ${complaint_id}=tendergov.Створити вимогу про виправлення умов закупівлі  ${username}  ${tender_uaid}  ${claim}  ${None}  ${lot_id}
+  ${complaint_id}=GovAuction.Створити вимогу про виправлення умов закупівлі  ${username}  ${tender_uaid}  ${claim}  ${None}  ${lot_id}
   [Return]  ${complaint_id}
 
 Скасувати вимогу про виправлення умов лоту
   [Arguments]  ${username}  ${tender_uaid}  ${complaintID}  ${cancellation_data}
-  tendergov.Скасувати вимогу про виправлення умов закупівлі  ${username}  ${tender_uaid}  ${complaintID}  ${cancellation_data}
+  GovAuction.Скасувати вимогу про виправлення умов закупівлі  ${username}  ${tender_uaid}  ${complaintID}  ${cancellation_data}
 
 Перетворити вимогу про виправлення умов закупівлі в скаргу
   [Arguments]  ${username}  ${tender_uaid}  ${complaintID}  ${escalating_data}
-  tendergov.Пошук тендера по ідентифікатору  ${username}  ${tender_uaid}
+  GovAuction.Пошук тендера по ідентифікатору  ${username}  ${tender_uaid}
   Run Keyword If  "переможця" in "${TEST_NAME}"  Run Keywords
   ...    Дочекатися І Клікнути  xpath=//div[@id="slidePanel"]/descendant::a[contains(@href,"tender/award")]
   ...    AND  Дочекатися І Клікнути  xpath=//*[@class="page-panel"]/descendant::a[contains(@href,"tender/qualification-complaints")]
@@ -1130,11 +1130,11 @@ Feature Count Should Not Be Zero
 
 Перетворити вимогу про виправлення умов лоту в скаргу
   [Arguments]  ${username}  ${tender_uaid}  ${complaintID}  ${escalating_data}
-  tendergov.Перетворити вимогу про виправлення умов закупівлі в скаргу  ${username}  ${tender_uaid}  ${complaintID}  ${escalating_data}
+  GovAuction.Перетворити вимогу про виправлення умов закупівлі в скаргу  ${username}  ${tender_uaid}  ${complaintID}  ${escalating_data}
 
 Створити вимогу про виправлення визначення переможця
   [Arguments]  ${username}  ${tender_uaid}  ${claim}  ${award_index}  ${document}=${None}
-  tendergov.Пошук тендера по ідентифікатору  ${username}  ${tender_uaid}
+  GovAuction.Пошук тендера по ідентифікатору  ${username}  ${tender_uaid}
   Дочекатися І Клікнути  xpath=//div[@id="slidePanel"]/descendant::a[contains(@href,"tender/award")]
   Toggle Sidebar
 #  Дочекатися І Клікнути  xpath=//a[contains(@href,"tender/qualification")]
@@ -1155,9 +1155,9 @@ Feature Count Should Not Be Zero
   ${complaintID}=   Get Text   xpath=(//*[@data-test-id="complaint.complaintID"])[last()]
   [Return]  ${complaintID}
 
-tendergov.Створити скаргу про виправлення визначення переможця
+GovAuction.Створити скаргу про виправлення визначення переможця
   [Arguments]  ${username}  ${tender_uaid}  ${claim}  ${award_index}  ${document}=${None}
-  tendergov.Пошук тендера по ідентифікатору  ${username}  ${tender_uaid}
+  GovAuction.Пошук тендера по ідентифікатору  ${username}  ${tender_uaid}
   Дочекатися І Клікнути  xpath=//div[@id="slidePanel"]/descendant::a[contains(@href,"tender/award")]
   Toggle Sidebar
   Дочекатися І Клікнути  xpath=(//a[contains(@href,"tender/qualification-complaints")])[last()]
@@ -1178,7 +1178,7 @@ tendergov.Створити скаргу про виправлення визна
 
 Підтвердити вирішення вимоги про виправлення визначення переможця
   [Arguments]  ${username}  ${tender_uaid}  ${complaintID}  ${confirmation_data}  ${award_index}
-  tendergov.Пошук тендера по ідентифікатору  ${username}  ${tender_uaid}
+  GovAuction.Пошук тендера по ідентифікатору  ${username}  ${tender_uaid}
   Дочекатися І Клікнути  xpath=//div[@id="slidePanel"]/descendant::a[contains(@href,"tender/award")]
   Дочекатися І Клікнути  xpath=//div[@data-test-id="awards.complaintPeriod.endDate"]/preceding-sibling::a[contains(@href,"tender/qualification-complaints")]
   Дочекатися І Клікнути  xpath=//button[@name="award_claim_resolved"]
@@ -1186,12 +1186,12 @@ tendergov.Створити скаргу про виправлення визна
 
 Створити чернетку вимоги про виправлення визначення переможця
   [Arguments]  ${username}  ${tender_uaid}  ${claim}  ${award_index}
-  ${complaint_id}=  tendergov.Створити вимогу про виправлення визначення переможця   ${username}  ${tender_uaid}  ${claim}  ${award_index}
+  ${complaint_id}=  GovAuction.Створити вимогу про виправлення визначення переможця   ${username}  ${tender_uaid}  ${claim}  ${award_index}
   [Return]  ${complaint_id}
 
 Скасувати вимогу про виправлення визначення переможця
   [Arguments]  ${username}  ${tender_uaid}  ${complaintID}  ${cancellation_data}  ${award_index}
-  tendergov.Пошук тендера по ідентифікатору  ${username}  ${tender_uaid}
+  GovAuction.Пошук тендера по ідентифікатору  ${username}  ${tender_uaid}
   Дочекатися І Клікнути  xpath=//div[@id="slidePanel"]/descendant::a[contains(@href,"tender/award")]
   Дочекатися І Клікнути  xpath=//div[@data-test-id="awards.complaintPeriod.endDate"]/preceding-sibling::a[contains(@href,"tender/qualification-complaints")]
   Дочекатися І Клікнути  xpath=//*[contains(text(),"${complaintID}")]/ancestor::div[@class="mk-question"]/descendant::*[@class="cancel_checkbox"]
@@ -1201,7 +1201,7 @@ tendergov.Створити скаргу про виправлення визна
 
 Перетворити вимогу про виправлення визначення переможця в скаргу
   [Arguments]  ${username}  ${tender_uaid}  ${complaintID}  ${escalating_data}  ${award_index}
-  tendergov.Пошук тендера по ідентифікатору  ${username}  ${tender_uaid}
+  GovAuction.Пошук тендера по ідентифікатору  ${username}  ${tender_uaid}
   Run Keyword If  "переможця" in "${TEST_NAME}"  Run Keywords
   ...    Дочекатися І Клікнути  xpath=//div[@id="slidePanel"]/descendant::a[contains(@href,"tender/award")]
   ...    AND  Дочекатися І Клікнути  xpath=//*[@class="page-panel"]/descendant::a[contains(@href,"tender/qualification-complaints")]
@@ -1216,7 +1216,7 @@ tendergov.Створити скаргу про виправлення визна
 
 Отримати інформацію із тендера
   [Arguments]  ${username}  ${tender_uaid}  ${field_name}
-#  tendergov.Пошук тендера по ідентифікатору  ${username}  ${tender_uaid}
+#  GovAuction.Пошук тендера по ідентифікатору  ${username}  ${tender_uaid}
   ${red}=  Evaluate  "\\033[1;31m"
 
   Run Keyword If  'title' in '${field_name}'  Execute Javascript  $("[data-test-id|='title']").css("text-transform", "unset")
@@ -1224,14 +1224,14 @@ tendergov.Створити скаргу про виправлення визна
   Run Keyword If  'status' in '${field_name}' and '${mode}' != 'negotiation'  Дочекатися І Клікнути  xpath=//*[contains(@href,"tender/json/")]
 #  Run Keyword And Ignore Error  Click Element  xpath=//button[@data-dismiss="modal"]
   Run Keyword If  '${field_name}' == 'qualificationPeriod.endDate'  Wait Until Keyword Succeeds  10 x  60 s  Run Keywords
-  ...  tendergov.Пошук тендера по ідентифікатору  ${username}  ${tender_uaid}
+  ...  GovAuction.Пошук тендера по ідентифікатору  ${username}  ${tender_uaid}
   ...  AND  Page Should Contain Element  xpath=//*[@data-test-id="qualificationPeriod.endDate"]
-  ${value}=  Run Keyword If  'unit.code' in '${field_name}'  Log To Console   ${red}\n\t\t\t Це поле не виводиться на  tendergov
+  ${value}=  Run Keyword If  'unit.code' in '${field_name}'  Log To Console   ${red}\n\t\t\t Це поле не виводиться на  GovAuction
   ...  ELSE IF  'qualifications' in '${field_name}'  Отримати інформацію із кваліфікації  ${username}  ${tender_uaid}  ${field_name}
   ...  ELSE IF  'awards' in '${field_name}'  Отримати інформацію із аварду  ${username}  ${tender_uaid}  ${field_name}
   ...  ELSE IF  'funders' in '${field_name}'  Get info from funders  ${username}  ${tender_uaid}  ${field_name}
   ...  ELSE IF  'unit' in '${field_name}'  Get Text  xpath=//*[@data-test-id="unit.name"]
-  ...  ELSE IF  'deliveryLocation' in '${field_name}'  Log To Console  ${red}\n\t\t\t Це поле не виводиться на  tendergov
+  ...  ELSE IF  'deliveryLocation' in '${field_name}'  Log To Console  ${red}\n\t\t\t Це поле не виводиться на  GovAuction
   ...  ELSE IF  'items' in '${field_name}'  Get Text  xpath=(//*[@data-test-id="${field_name.replace('[${field_name.split('[')[1].split(']')[0]}]', '')}"])[${field_name.split('[')[1].split(']')[0]} + 1]
   ...  ELSE IF  'agreements' in '${field_name}'  Get Info From Agreements  ${username}  ${tender_uaid}  ${field_name}
 #  ...  ELSE IF  'contracts' in '${field_name}'  Get info from contracts  ${username}  ${tender_uaid}  ${field_name}
@@ -1282,7 +1282,7 @@ Get info from funders
 Get Info From Agreements
   [Arguments]  ${username}  ${tender_uaid}  ${field_name}
   ${field_name}=  Set Variable If  '[' in '${field_name}'  ${field_name.split('[')[0]}${field_name.split(']')[1]}  ${field_name}
-  tendergov.Пошук тендера по ідентифікатору   ${username}  ${tender_uaid}
+  GovAuction.Пошук тендера по ідентифікатору   ${username}  ${tender_uaid}
   Дочекатися І Клікнути  xpath=//div[@id="slidePanel"]/descendant::a[contains(@href,"tender/protokol")]
 #  Run Keyword If  "${TEST NAME}" == "Відображення статусу зареєстрованої угоди"
 #  ...  ${status}=  Run Keyword And Return Status  Page Should Contain Element  xpath=//div[@class="col-xs-12 col-sm-6 col-md-8 item-bl_val"][contains(text(),"Укладена рамкова угода")]
@@ -1299,8 +1299,8 @@ Get Info From Agreements
   ${red}=  Evaluate  "\\033[1;31m"
   ${field_name}=  Set Variable If  '[' in '${field_name}'  ${field_name.split('[')[0]}${field_name.split(']')[1]}  ${field_name}
   ${value}=  Run Keyword If
-  ...  'unit.code' in '${field_name}'  Log To Console   ${red}\n\t\t\t Це поле не виводиться на  tendergov
-  ...  ELSE IF  'deliveryLocation' in '${field_name}'  Log To Console  ${red}\n\t\t\t Це поле не виводиться на  tendergov
+  ...  'unit.code' in '${field_name}'  Log To Console   ${red}\n\t\t\t Це поле не виводиться на  GovAuction
+  ...  ELSE IF  'deliveryLocation' in '${field_name}'  Log To Console  ${red}\n\t\t\t Це поле не виводиться на  GovAuction
   ...  ELSE IF  'unit' in '${field_name}'  Get Text  xpath=//*[contains(text(), '${item_id}')]/ancestor::div[@class="item no_border"]/descendant::*[@data-test-id='items.quantity']
   ...  ELSE  Get Text  xpath=//*[contains(text(), '${item_id}')]/ancestor::div[@class="item-block"]/descendant::*[@data-test-id='items.${field_name}']
   ${value}=  adapt_view_item_data  ${value}  ${field_name}
@@ -1339,12 +1339,12 @@ Get Info From Agreements
 
 Отримати документ до лоту
   [Arguments]  ${username}  ${tender_uaid}  ${lot_id}  ${doc_id}
-  ${file_name}= tendergov.Отримати документ   ${username}  ${tender_uaid}  ${doc_id}
+  ${file_name}= GovAuction.Отримати документ   ${username}  ${tender_uaid}  ${doc_id}
   [Return]  ${file_name}
 
 Отримати інформацію із запитання
   [Arguments]  ${username}  ${tender_uaid}  ${question_id}  ${field_name}
-  tendergov.Пошук тендера по ідентифікатору   ${username}  ${tender_uaid}
+  GovAuction.Пошук тендера по ідентифікатору   ${username}  ${tender_uaid}
   Дочекатися І Клікнути  xpath=//div[@id="slidePanel"]/descendant::a[contains(@href, "/questions")]
   Wait Until Element Is Not Visible  xpath=//*[@data-test-id="items.description"]
   Wait Until Keyword Succeeds  5 x  60 s  Run Keywords
@@ -1357,7 +1357,7 @@ Get Info From Agreements
 Отримати інформацію із скарги
   [Arguments]  ${username}  ${tender_uaid}  ${complaintID}  ${field_name}  ${award_index}=${None}
   Run keyword If  '${field_name}' == 'status' and '${ROLE}' == 'viewer'  Sleep  120
-  tendergov.Пошук тендера по ідентифікатору  ${username}  ${tender_uaid}
+  GovAuction.Пошук тендера по ідентифікатору  ${username}  ${tender_uaid}
   Run Keyword If  "ignored" in "${TEST_NAME}"  Run Keywords
   ...    Дочекатися І Клікнути  xpath=//div[@id="slidePanel"]/descendant::a[contains(@href,"tender/protokol")]
   ...    AND  Дочекатися І Клікнути  xpath=//*[@class="page-panel"]/descendant::a[contains(@href,"tender/qualification-complaints")]
@@ -1371,29 +1371,29 @@ Get Info From Agreements
   ...  AND  Page Should Contain Element  xpath=//*[contains(text(), "${complaintID}")]/ancestor::div[@class="mk-question"]/descendant::*[@data-test-id="complaint.${field_name}"]
   Capture Page Screenshot
   ${value}=  Get Text  xpath=//*[contains(text(), "${complaintID}")]/ancestor::div[@class="mk-question"]/descendant::*[@data-test-id="complaint.${field_name}"]
-  ${value}=  convert_string_from_dict_tendergov   ${value}
+  ${value}=  convert_string_from_dict_GovAuction   ${value}
   [Return]  ${value}
 
 Отримати інформацію із документа до скарги
   [Arguments]  ${username}  ${tender_uaid}  ${complaintID}  ${doc_id}  ${field_name}  ${award_id}=${None}
-  tendergov.Пошук тендера по ідентифікатору   ${username}  ${tender_uaid}
+  GovAuction.Пошук тендера по ідентифікатору   ${username}  ${tender_uaid}
   Run Keyword If  "переможця" in "${TEST_NAME}"  Run Keywords
   ...    Дочекатися І Клікнути  xpath=//div[@id="slidePanel"]/descendant::a[contains(@href,"tender/award")]
   ...    AND  Дочекатися І Клікнути  xpath=//*[@class="page-panel"]/descendant::a[contains(@href,"tender/qualification-complaints")]
   ...  ELSE  Дочекатися І Клікнути  xpath=//div[@id="slidePanel"]/descendant::a[contains(@href,"tender/complaints")]
-  ${value}=  tendergov.Отримати інформацію із документа  ${username}  ${tender_uaid}  ${doc_id}  ${field_name}
+  ${value}=  GovAuction.Отримати інформацію із документа  ${username}  ${tender_uaid}  ${doc_id}  ${field_name}
   [Return]  ${value}
 
 Отримати документ до скарги
   [Arguments]  ${username}  ${tender_uaid}  ${complaintID}  ${doc_id}  ${award_id}=${None}
-  tendergov.Пошук тендера по ідентифікатору   ${username}  ${tender_uaid}
+  GovAuction.Пошук тендера по ідентифікатору   ${username}  ${tender_uaid}
   Дочекатися І Клікнути  xpath=//div[@id="slidePanel"]/descendant::a[contains(@href, "/complaints")]
-  ${value}=  tendergov.Отримати документ   ${username}  ${tender_uaid}  ${doc_id}
+  ${value}=  GovAuction.Отримати документ   ${username}  ${tender_uaid}  ${doc_id}
   [Return]  ${value}
 
 Отримати інформацію із пропозиції
   [Arguments]  ${username}  ${tender_uaid}  ${field}
-  tendergov.Пошук тендера по ідентифікатору   ${username}  ${tender_uaid}
+  GovAuction.Пошук тендера по ідентифікатору   ${username}  ${tender_uaid}
   Run Keyword If  '${mode}' == 'open_esco'  Sleep  700
   ...  ELSE IF  '${mode}' == 'openua_defense'  Sleep  100
   ...  ELSE  Sleep  500
@@ -1407,7 +1407,7 @@ Get Info From Agreements
 
 Отримати інфорцію про замовника
   [Arguments]  ${username}  ${tender_uaid}  ${field_name}
-  tendergov.Пошук тендера по ідентифікатору   ${username}  ${tender_uaid}
+  GovAuction.Пошук тендера по ідентифікатору   ${username}  ${tender_uaid}
   ${address}=  Run Keyword If  "address" in "${field_name}"  Get Text  xpath=//*[@data-test-id="procuringEntity.address"]
   ${value}=  Set Variable If  "procuringEntity.address.countryName" in "${field_name}"  ${address.split(" ")[0]}
   ...  "procuringEntity.address.locality" in "${field_name}"  ${address.split(" ")[2]}
@@ -1418,7 +1418,7 @@ Get Info From Agreements
 
 Отримати інформацію із кваліфікації
   [Arguments]  ${username}  ${tender_uaid}  ${field_name}
-  tendergov.Пошук тендера по ідентифікатору   ${username}  ${tender_uaid}
+  GovAuction.Пошук тендера по ідентифікатору   ${username}  ${tender_uaid}
   ${index_str}=  Set Variable  ${field_name[15]}
   ${index_int}=  Convert To Integer  ${index_str}
   Дочекатися І Клікнути  xpath=//div[@id="slidePanel"]/descendant::a[contains(@href,"tender/euprequalification")]
@@ -1427,7 +1427,7 @@ Get Info From Agreements
 
 Отримати інформацію із аварду
   [Arguments]  ${username}  ${tender_uaid}  ${field_name}
-  tendergov.Пошук тендера по ідентифікатору   ${username}  ${tender_uaid}
+  GovAuction.Пошук тендера по ідентифікатору   ${username}  ${tender_uaid}
   ${is_visible}=  Run Keyword And Return Status  Element Should Be Visible  xpath=//div[@id="slidePanel"]/descendant::a[contains(@href,"tender/protokol")]
   Run Keyword If  ${is_visible}  Дочекатися І Клікнути  xpath=//div[@id="slidePanel"]/descendant::a[contains(@href,"tender/protokol")]
   ...  ELSE  Дочекатися І Клікнути  xpath=//div[@id="slidePanel"]/descendant::a[contains(@href,"tender/award")]
@@ -1456,7 +1456,7 @@ Get Info From Complaints
 
 Отримати статус контракта
   [Arguments]  ${username}  ${tender_uaid}  ${field_name}
-  tendergov.Пошук тендера по ідентифікатору   ${username}  ${tender_uaid}
+  GovAuction.Пошук тендера по ідентифікатору   ${username}  ${tender_uaid}
   ${is_visible}=  Run Keyword And Return Status  Element Should Be Visible  xpath=//div[@id="slidePanel"]/descendant::a[contains(@href,"tender/protokol")]
   Run Keyword If  ${is_visible}  Run Keywords
   ...  Дочекатися І Клікнути  xpath=//div[@id="slidePanel"]/descendant::a[contains(@href,"tender/protokol")]
@@ -1476,7 +1476,7 @@ Get Info From Complaints
 
 Отримати інформацію із угоди
   [Arguments]  ${username}  ${agreement_uaid}  ${field_name}
-  tendergov.Отримати доступ до угоди  ${username}  ${agreement_uaid}
+  GovAuction.Отримати доступ до угоди  ${username}  ${agreement_uaid}
   ${field_name}=  Set Variable If  '[' in '${field_name}'  ${field_name.split('[')[0]}${field_name.split(']')[1]}  ${field_name}
   ${index}=  Set Variable If  '[' in '${field_name}'  ${field_name.split('[')[1].split(']')[0]}
   ${index}=  Convert To Number  ${index}
@@ -1497,7 +1497,7 @@ Get Info From Complaints
   ${selfeligible_status}=  Run Keyword And Return Status  Dictionary Should Contain Key  ${bid.data}  selfEligible
   ${selfqualified_status}=  Run Keyword And Return Status  Dictionary Should Contain Key  ${bid.data}  selfQualified
   ${lots_status}=  Run Keyword And Return Status  Dictionary Should Contain Key  ${bid.data}  lotValues
-  tendergov.Пошук тендера по ідентифікатору   ${username}  ${tender_uaid}
+  GovAuction.Пошук тендера по ідентифікатору   ${username}  ${tender_uaid}
   Sleep  2
   Run Keyword If  ${lots_status}  Ввести пропозицію для лотової зкупівлі  ${bid}
   ...  ELSE  ConvToStr And Input Text  name=Bid[value][amount]  ${bid.data.value.amount}
@@ -1576,13 +1576,13 @@ Add annual costs reduction
 Скасувати цінову пропозицію
   \  ${value}=  Convert To Integer  ${bid.data.parameters[${feature_index}]["value"]}
   [Arguments]  ${username}  ${tender_uaid}
-  tendergov.Пошук тендера по ідентифікатору   ${username}  ${tender_uaid}
+  GovAuction.Пошук тендера по ідентифікатору   ${username}  ${tender_uaid}
   Execute Javascript  window.confirm = function(msg) { return true; }
   Дочекатися І Клікнути  xpath=//button[@name="delete_bids"]
 
 Змінити цінову пропозицію
   [Arguments]  ${username}  ${tender_uaid}  ${fieldname}  ${fieldvalue}
-  tendergov.Пошук тендера по ідентифікатору   ${username}  ${tender_uaid}
+  GovAuction.Пошук тендера по ідентифікатору   ${username}  ${tender_uaid}
   Run Keyword If  "${fieldname}" == "status"  Wait Until Keyword Succeeds  20 x  10 s  Run Keywords
   ...  Дочекатися І Клікнути  xpath=//*[contains(@href,"tender/json/")]
   ...  AND  Page Should Contain Element  xpath=//span[@class="label label-danger"][contains(text(),"Недійсна")] /ancestor::div[@class="pull-right"]
@@ -1605,7 +1605,7 @@ Add annual costs reduction
   [Arguments]  ${username}  ${path}  ${tender_uaid}  ${doc_name}=documents  ${doc_type}=technicalSpecifications
   ${doc_type}=  Set Variable If  '${doc_type}' == 'None'  technicalSpecifications  ${doc_type}
   ${doc_type}=  Set Variable If  '${doc_type}' == 'winningBid'  technicalSpecifications  ${doc_type}
-  tendergov.Пошук тендера по ідентифікатору   ${username}  ${tender_uaid}
+  GovAuction.Пошук тендера по ідентифікатору   ${username}  ${tender_uaid}
   Scroll To Element  xpath=(//input[@type="file"])[last()]
   Sleep  5
   Choose File  xpath=(//input[@type="file"])[last()]  ${path}
@@ -1631,7 +1631,7 @@ Add annual costs reduction
 
 Змінити документацію в ставці
   [Arguments]  ${username}  ${tender_uaid}  ${doc_data}  ${doc_id}
-  tendergov.Пошук тендера по ідентифікатору   ${username}  ${tender_uaid}
+  GovAuction.Пошук тендера по ідентифікатору   ${username}  ${tender_uaid}
   Дочекатися І Клікнути  xpath=(//*[@class="confidentiality"])[last()]/..
   Input Text  xpath=(//textarea[contains(@name,"confidentialityRationale")])[last()]  ${doc_data.data.confidentialityRationale}
   Подати Пропозицію Без Накладення ЕЦП
@@ -1639,7 +1639,7 @@ Add annual costs reduction
 
 Завантажити документ в рамкову угоду
   [Arguments]  ${username}  ${filepath}  ${agreement_uaid}
-  tendergov.Пошук угоди по ідентифікатору  ${username}  ${agreement_uaid}
+  GovAuction.Пошук угоди по ідентифікатору  ${username}  ${agreement_uaid}
   Choose File  xpath=//input[@name="FileUpload[file][]"]  ${filepath}
   Wait Until Keyword Succeeds  5 x  1 s  Element Should Be Visible  xpath=(//div[@class="document"]/descendant::select[@class="document-type"])[2]
   Select From List By Value  xpath=(//div[@class="document"]/descendant::select[@class="document-type"])[2]  notice
@@ -1655,7 +1655,7 @@ Add annual costs reduction
 
 Завантажити документ у кваліфікацію
   [Arguments]  ${username}  ${document}  ${tender_uaid}  ${qualification_num}
-  tendergov.Пошук тендера по ідентифікатору   ${username}  ${tender_uaid}
+  GovAuction.Пошук тендера по ідентифікатору   ${username}  ${tender_uaid}
   ${qualification_num}=  Convert To Integer  ${qualification_num}
   Дочекатися І Клікнути  xpath=//div[@id="slidePanel"]/descendant::a[contains(@href,"tender/euprequalification")]
   Click Element  xpath=//*[@data-mtitle="№" and contains(text(),"${qualification_num + 1}")]/../descendant::*[contains(@id,"modal-qualification-button")]
@@ -1665,7 +1665,7 @@ Add annual costs reduction
 Завантажити документ рішення кваліфікаційної комісії
   [Arguments]  ${username}  ${document}  ${tender_uaid}  ${award_num}
   ${award_num}=  Convert To Integer  ${award_num}
-  tendergov.Пошук тендера по ідентифікатору   ${username}  ${tender_uaid}
+  GovAuction.Пошук тендера по ідентифікатору   ${username}  ${tender_uaid}
   Дочекатися І Клікнути  xpath=//div[@id="slidePanel"]/descendant::a[contains(@href,"tender/award")]
   Дочекатися І Клікнути  xpath=//*[contains(@id,"modal-award-qualification-button")]
   Wait Element Animation  xpath=//*[@class="h2 text-center"]
@@ -1702,7 +1702,7 @@ Add annual costs reduction
   [Arguments]  ${username}  ${tender_uaid}  ${award_num}
 #  Log  Необхідні дії було виконано у "Завантажити документ рішення кваліфікаційної комісії"
   ${award_num}=  Convert To Integer  ${award_num}
-  tendergov.Пошук тендера по ідентифікатору   ${username}  ${tender_uaid}
+  GovAuction.Пошук тендера по ідентифікатору   ${username}  ${tender_uaid}
   Дочекатися І Клікнути  xpath=//div[@id="slidePanel"]/descendant::a[contains(@href,"tender/award")]
   Run Keyword If  '${mode}' != 'belowThreshold'  Run Keywords
   ...  Дочекатися І Клікнути  xpath=//button[contains(@id, "modal-award-qualification-button")]
@@ -1719,10 +1719,10 @@ Make Global Qualifications List
   [Arguments]  ${username}  ${tender_uaid}  ${qualification_num}
   ${document}=  get_upload_file_path
 #  ${qualification_num}=  Set Variable If  "${qualification_num}" == "-1"  1  ${qualification_num}  # Needed in cause of getting -1 for second qualifyer from Quinta`s code
-#tendergov.Завантажити документ у кваліфікацію  ${username}  ${document}  ${tender_uaid}  ${qualification_num}
+#GovAuction.Завантажити документ у кваліфікацію  ${username}  ${document}  ${tender_uaid}  ${qualification_num}
 #  Wait And Select From List By Value  xpath=//select[@id="document-type-0"]  awardNotice
   ${qualification_num}=  Convert To Integer  ${qualification_num}
-  tendergov.Пошук тендера по ідентифікатору  ${username}  ${tender_uaid}
+  GovAuction.Пошук тендера по ідентифікатору  ${username}  ${tender_uaid}
   Run Keyword If  "${TEST NAME}" == "Можливість підтвердити першу пропозицію кваліфікації"  Make Global Qualifications List
   ...  ELSE IF  "${TEST NAME}" == "Можливість підтвердити першу пропозицію кваліфікації на другому етапі"  Make Global Qualifications List
   ${company_name}=  Set Variable  ${qualifications_lst[${qualification_num}]}
@@ -1745,9 +1745,9 @@ Make Global Qualifications List
 #  Wait Until Keyword Succeeds  5x  1s   Page Should Contain Element  xpath=//*[@name="cancel_prequalification"]
   Wait Until Keyword Succeeds  10 x  1 s  Page Should Contain Element  xpath=//div[contains(@class, "alert-success")]
 
-tendergov.Затвердити постачальників
+GovAuction.Затвердити постачальників
   [Arguments]  ${username}  ${tender_uaid}
-  tendergov.Пошук тендера по ідентифікатору  ${username}  ${tender_uaid}
+  GovAuction.Пошук тендера по ідентифікатору  ${username}  ${tender_uaid}
   Дочекатися І Клікнути  xpath=//div[@id="slidePanel"]/descendant::a[contains(@href,"tender/award")]
   Дочекатися І Клікнути  xpath=//button[@class="mk-btn mk-btn_accept js-btn-agreement-action"]
   Wait Element Animation  xpath=//button[@class="btn mk-btn mk-btn_accept"]
@@ -1758,7 +1758,7 @@ tendergov.Затвердити постачальників
   [Arguments]  ${username}  ${tender_uaid}  ${qualification_num}
   ${qualification_num}=  Convert To Integer  ${qualification_num}
   ${company_name}=  Set Variable  ${qualifications_lst[${qualification_num}]}
-  tendergov.Пошук тендера по ідентифікатору  ${username}  ${tender_uaid}
+  GovAuction.Пошук тендера по ідентифікатору  ${username}  ${tender_uaid}
   Дочекатися І Клікнути  xpath=//*[contains(@href,"tender/euprequalification/")]
 #  Run Keyword If  '${mode}' == 'openeu'  Дочекатися І Клікнути  xpath=//*[contains(@id,"modal-qualification") and contains(@class,"mk-btn mk-btn_accept")]
 #  ...  ELSE  Дочекатися І Клікнути  xpath=(//*[contains(@id,"modal-qualification") and contains(@class,"mk-btn mk-btn_accept")])[${qualification_num + 1}]
@@ -1776,7 +1776,7 @@ tendergov.Затвердити постачальників
 
 Скасувати кваліфікацію
   [Arguments]  ${username}  ${tender_uaid}  ${qualification_num}
-  tendergov.Пошук тендера по ідентифікатору   ${username}  ${tender_uaid}
+  GovAuction.Пошук тендера по ідентифікатору   ${username}  ${tender_uaid}
   ${qualification_num}=  Convert To Integer  ${qualification_num}
   ${company_name}=  Set Variable  ${qualifications_lst[${qualification_num}]}
   Дочекатися І Клікнути  xpath=//*[contains(@href,"tender/euprequalification/")]
@@ -1787,9 +1787,9 @@ tendergov.Затвердити постачальників
   Wait Until Keyword Succeeds  10 x  1 s  Page Should Contain Element  xpath=//*[text()="${company_name}"]/../../descendant::button[@class="mk-btn mk-btn_accept"]
 
 
-tendergov.Скасування рішення кваліфікаційної комісії
+GovAuction.Скасування рішення кваліфікаційної комісії
   [Arguments]  ${username}  ${tender_uaid}  ${award_num}
-  tendergov.Пошук тендера по ідентифікатору   ${username}  ${tender_uaid}
+  GovAuction.Пошук тендера по ідентифікатору   ${username}  ${tender_uaid}
   ${is_award}=  Run Keyword And Return Status  Page Should Contain  Визначення переможців
 #  Дочекатися І Клікнути  xpath=//button[@class="mk-btn mk-btn_danger btn-award"]
 #  Wait Element Animation  xpath//div[@class="modal-footer"][2]
@@ -1802,7 +1802,7 @@ tendergov.Скасування рішення кваліфікаційної к�
   Дочекатися І Клікнути  xpath=//button[@class="btn mk-btn mk-btn_danger"]
   Run Keyword If  ${is_award}  Disqualification of the first winner  ${username}  ${tender_uaid}  ${award_num}
 
-tendergov.Дискваліфікувати постачальника
+GovAuction.Дискваліфікувати постачальника
   [Arguments]  ${username}  ${tender_uaid}  ${award_num}
   Log  Необхідні дії було виконано у "Скасування рішення кваліфікаційної комісії"
 
@@ -1839,7 +1839,7 @@ Disqualification of the first winner
 
 Затвердити остаточне рішення кваліфікації
   [Arguments]  ${username}  ${tender_uaid}
-  tendergov.Пошук тендера по ідентифікатору   ${username}  ${tender_uaid}
+  GovAuction.Пошук тендера по ідентифікатору   ${username}  ${tender_uaid}
 #  Run Keyword If  '${MODE}' != 'belowThreshold'  Run Keywords
 #  Run Keyword If  '${MODE}' == 'open_competitive_dialogue'  Дочекатися І Клікнути  xpath=//
   Дочекатися І Клікнути  xpath=//div[@id="slidePanel"]/descendant::a[contains(@href,"tender/euprequalification")]
@@ -1850,7 +1850,7 @@ Disqualification of the first winner
   [Arguments]  ${username}  ${tender_uaid}  ${contract_num}
   Sleep  60
   ${document}=  get_upload_file_path
-  tendergov.Пошук тендера по ідентифікатору   ${username}  ${tender_uaid}
+  GovAuction.Пошук тендера по ідентифікатору   ${username}  ${tender_uaid}
   Дочекатися І Клікнути  xpath=//div[@id="slidePanel"]/descendant::a[contains(@href,"tender/award")]
   Wait Until Keyword Succeeds  5 x  0.5 s  Дочекатися І Клікнути  xpath=//button[@class="mk-btn mk-btn_default js-btn-contract-award"]
   Wait Until Element Is Visible  xpath=//*[text()="Додати документ"]
@@ -1887,10 +1887,10 @@ Disqualification of the first winner
 #  ...  AND  Накласти ЄЦП на контракт
 
 
-tendergov.Встановити ціну за одиницю для контракту
+GovAuction.Встановити ціну за одиницю для контракту
   [Arguments]  ${username}  ${tender_uaid}  ${contract_data}
   ${company_name}=  Set Variable  ${contract_data.data.suppliers[0].identifier.legalName}
-  tendergov.Пошук тендера по ідентифікатору   ${username}  ${tender_uaid}
+  GovAuction.Пошук тендера по ідентифікатору   ${username}  ${tender_uaid}
   Дочекатися І Клікнути  xpath=//div[@id="slidePanel"]/descendant::a[contains(@href,"tender/award")]
   Дочекатися І Клікнути  xpath=//div[contains(text(),"${company_name}")]/../descendant::button[contains(text(), "Ціна за одиницю")]
   Wait Element Animation  xpath=//div[contains(text(), "${company_name}")]/ancestor::div[@class="modal-content"]/descendant::button[@class="mk-btn mk-btn_accept btn_submit_form"]
@@ -1899,11 +1899,11 @@ tendergov.Встановити ціну за одиницю для контра�
   Wait Until Keyword Succeeds  10 x  1 s  Element Should Be Visible  xpath=//div[contains(text(), "${company_name}")]/ancestor::div[@class="modal-content"]/descendant::button[@class="mk-btn mk-btn_accept btn_submit_form"]
 
 
-tendergov.Зареєструвати угоду
+GovAuction.Зареєструвати угоду
   [Arguments]  ${username}  ${tender_uaid}  ${period}
-  tendergov.Пошук тендера по ідентифікатору   ${username}  ${tender_uaid}
-  ${startDate}=  convert_date_plan_to_ tendergov_format  ${period['startDate']}
-  ${endDate}=  convert_date_plan_to_ tendergov_format  ${period['endDate']}
+  GovAuction.Пошук тендера по ідентифікатору   ${username}  ${tender_uaid}
+  ${startDate}=  convert_date_plan_to_ GovAuction_format  ${period['startDate']}
+  ${endDate}=  convert_date_plan_to_ GovAuction_format  ${period['endDate']}
   Дочекатися І Клікнути  xpath=//div[@id="slidePanel"]/descendant::a[contains(@href,"tender/award")]
   Дочекатися І Клікнути  xpath=//button[@id="agreement-modal-info"]
   Wait Element Animation  xpath=//div[contains(text(), "Інформація по угоді")]/ancestor::div[@class="modal-content"]/descendant::button[@class="mk-btn mk-btn_accept btn_submit_form"]
@@ -1923,21 +1923,21 @@ tendergov.Зареєструвати угоду
 #  [Return]  ${agreement_uaid}
 
 
-tendergov.Пошук угоди по ідентифікатору
+GovAuction.Пошук угоди по ідентифікатору
   [Arguments]  ${username}  ${agreement_uaid}  ${save_key}=agreement_data
-  tendergov.Пошук тендера по ідентифікатору   ${username}  ${agreement_uaid[0:-3]}
+  GovAuction.Пошук тендера по ідентифікатору   ${username}  ${agreement_uaid[0:-3]}
   Дочекатися І Клікнути  xpath=//div[@id="slidePanel"]/descendant::a[contains(@href,"tender/protokol")]
   Wait Until Element Is Visible  xpath=//*[contains(@href,"/agreements/view/")]  10
   Click Element  xpath=//*[contains(@href,"/agreements/view/")]
 
 Отримати доступ до угоди
   [Arguments]  ${username}  ${agreement_uaid}
-  tendergov.Пошук угоди по ідентифікатору  ${username}  ${agreement_uaid}
+  GovAuction.Пошук угоди по ідентифікатору  ${username}  ${agreement_uaid}
 #  Wait Until Keyword Succeeds  10 x  1 s  Page Should Contain Element  xpath=//div[@class="col-xs-12 text-center"]/descendant::button[contains(text(),"Оголосити відбір для закупівлі за рамковою угодою")]
 
 Внести зміну в угоду
   [Arguments]  ${username}  ${agreement_uaid}  ${change_data}
-  tendergov.Отримати доступ до угоди  ${username}  ${agreement_uaid}
+  GovAuction.Отримати доступ до угоди  ${username}  ${agreement_uaid}
   ${url}=  Get Location
   Wait Until Keyword Succeeds  30 x  5 s  Run Keywords
   ...  Force Agreement Synchronization  ${url}
@@ -1958,7 +1958,7 @@ tendergov.Пошук угоди по ідентифікатору
 
 Оновити властивості угоди
   [Arguments]  ${username}  ${agreement_uaid}  ${data}
-  tendergov.Отримати доступ до угоди  ${username}  ${agreement_uaid}
+  GovAuction.Отримати доступ до угоди  ${username}  ${agreement_uaid}
   ${is_addend}=  Run Keyword And Return Status  Dictionary Should Contain Key  ${data.data.modifications[0]}  addend
   ${is_factor}=  Run Keyword And Return Status  Dictionary Should Contain Key  ${data.data.modifications[0]}  factor
 #  ${value_addend}=  Set Variable If  ${is_addend}  ${data.data.modifications[0].addend}
@@ -1980,7 +1980,7 @@ tendergov.Пошук угоди по ідентифікатору
 
 Завантажити документ для зміни у рамковій угоді
   [Arguments]  ${username}  ${filepath}  ${agreement_uaid}  ${item_id}
-  tendergov.Отримати доступ до угоди  ${username}  ${agreement_uaid}
+  GovAuction.Отримати доступ до угоди  ${username}  ${agreement_uaid}
   Wait Until Keyword Succeeds  10 x  1 s  Page Should Contain Element  xpath=//a[contains(@class, "mk-btn mk-btn_default") and contains(text(),"Редагувати зміни")]
   Click Element  xpath=//a[contains(@class, "mk-btn mk-btn_default") and contains(text(),"Редагувати зміни")]
   Choose File  xpath=//input[@name="FileUpload[file][]"]  ${filepath}
@@ -1990,7 +1990,7 @@ tendergov.Пошук угоди по ідентифікатору
 
 Застосувати зміну для угоди
   [Arguments]  ${username}  ${agreement_uaid}  ${dateSigned}  ${status}
-  tendergov.Отримати доступ до угоди  ${username}  ${agreement_uaid}
+  GovAuction.Отримати доступ до угоди  ${username}  ${agreement_uaid}
   ${url}=  Get Location
   Run Keyword If  '${status}' == 'active'  Run Keywords
   ...  Wait Until Keyword Succeeds  10 x  1 s  Page Should Contain Element  xpath=//button[@class="mk-btn mk-btn_accept js-btn-agreement-action"]
@@ -2010,13 +2010,13 @@ tendergov.Пошук угоди по ідентифікатору
 
 Отримати посилання на аукціон для глядача
   [Arguments]  ${username}  ${tender_uaid}  ${lot_id}=${Empty}
-  tendergov.Пошук тендера по ідентифікатору   ${username}  ${tender_uaid}
+  GovAuction.Пошук тендера по ідентифікатору   ${username}  ${tender_uaid}
   ${auction_url}=  Wait Until Keyword Succeeds  10 x  60 s  Дочекатися посилання на аукціон
   [Return]  ${auction_url}
 
 Отримати посилання на аукціон для учасника
   [Arguments]  ${username}  ${tender_uaid}
-  tendergov.Пошук тендера по ідентифікатору   ${username}  ${tender_uaid}
+  GovAuction.Пошук тендера по ідентифікатору   ${username}  ${tender_uaid}
   ${current_url}=  Get Location
   Run Keyword If  ${NUMBER_OF_LOTS} == 0  Execute Javascript  window['url'] = null; $.get( "${host}/seller/tender/updatebid", { id: "${current_url.split("/")[-1]}"}, function(data){ window['url'] = data.data.participationUrl },'json');
   ...  ELSE  Execute Javascript  window['url'] = null; $.get( "${host}/seller/tender/updatebid", { id: "${current_url.split("/")[-1]}"}, function(data){ window['url'] = data.data.lotValues[0].participationUrl },'json');
@@ -2035,12 +2035,12 @@ ConvToStr And Input Text
 Conv And Select From List By Value
   [Arguments]  ${locator}  ${smth_to_select}
   ${smth_to_select}=  Convert To String  ${smth_to_select}
-#  ${smth_to_select}=  convert_string_from_dict_ tendergov  ${smth_to_select}
+#  ${smth_to_select}=  convert_string_from_dict_ GovAuction  ${smth_to_select}
   Wait And Select From List By Value  ${locator}  ${smth_to_select}
 
 Input Date
   [Arguments]  ${elem_locator}  ${date}
-  ${date}=  convert_datetime_to_tendergov_format  ${date}
+  ${date}=  convert_datetime_to_GovAuction_format  ${date}
 #  Input Text  ${elem_locator}  ${date}
   Execute Javascript  document.querySelector('[${elem_locator}]').value="${date}"
 

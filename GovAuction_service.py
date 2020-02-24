@@ -25,29 +25,29 @@ def subtract_min_from_date(date, minutes, template):
     return "{}+{}".format(date_obj - timedelta(minutes=minutes), date.split("+")[1])
 
 
-def convert_datetime_to_tendergov_format(isodate):
+def convert_datetime_to_GovAuction_format(isodate):
     iso_dt = parse_date(isodate)
     day_string = iso_dt.strftime("%d/%m/%Y %H:%M")
     return day_string
 
-def convert_date_plan_to_tendergov_format(isodate):
+def convert_date_plan_to_GovAuction_format(isodate):
     iso_dt = parse_date(isodate)
     day_string = iso_dt.strftime("%d/%m/%Y")
     return day_string
 
 
-def convert_date_plan_tender_to_tendergov_format(isodate):
+def convert_date_plan_tender_to_GovAuction_format(isodate):
     iso_dt = parse_date(isodate)
     day_string = iso_dt.strftime("%m/%Y")
     return day_string
 
-def convert_date_plan_to_tendergov_format_year(isodate):
+def convert_date_plan_to_GovAuction_format_year(isodate):
     iso_dt = parse_date(isodate)
     day_string = iso_dt.strftime("%Y")
     return day_string
 
 
-def convert_string_from_dict_tendergov(string):
+def convert_string_from_dict_GovAuction(string):
     return {
         u"грн.": u"UAH",
         u"True": u"1",
@@ -182,7 +182,7 @@ def adapt_view_tender_data(value, field_name):
         value = "P{}Y{}M{}D".format(l[0], l[2], l[4] )
     elif 'yearlyPaymentsPercentageRange'in field_name:
         value = round(float(value.split(" ")[-1][:-1]) / 100, 5)
-    return convert_string_from_dict_tendergov(value)
+    return convert_string_from_dict_GovAuction(value)
 
 
 def adapt_view_lot_data(value, field_name):
@@ -198,7 +198,7 @@ def adapt_view_lot_data(value, field_name):
         value = float("".join(value.split(' ')[:-1]))
     elif 'Date' in field_name:
         value = convert_time(value)
-    return convert_string_from_dict_tendergov(value)
+    return convert_string_from_dict_GovAuction(value)
 
 
 def adapt_view_item_data(value, field_name):
@@ -208,7 +208,7 @@ def adapt_view_item_data(value, field_name):
         value = float(value.split(' ')[0])
     elif 'Date' in field_name:
         value = convert_time(value)
-    return convert_string_from_dict_tendergov(value)
+    return convert_string_from_dict_GovAuction(value)
 
 
 def get_related_elem_description(tender_data, feature, item_id):
@@ -232,7 +232,7 @@ def add_second_sign_after_point(amount):
 
 
 def get_upload_file_path():
-    return os.path.join(os.getcwd(), 'src/robot_tests.broker.tendergov/testFileForUpload.txt')
+    return os.path.join(os.getcwd(), 'src/robot_tests.broker.GovAuction/testFileForUpload.txt')
 
 
 def get_company_name_by_bid_id(bid_id, data):
