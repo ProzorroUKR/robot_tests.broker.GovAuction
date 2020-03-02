@@ -709,12 +709,12 @@ Go To And Assert
   ${current_url}=  Get Location
   Should Be Equal  ${url}  ${current_url}
 
-Force agreement synchronization
-  [Arguments]  ${url}
-  Go To  ${url}
-#  ${synchro_url}=  ${url.replace("view", "json")}
-  Go To  ${url.replace("view", "json")}
-  Go To  ${url}
+#Force agreement synchronization
+#  [Arguments]  ${url}
+#  Go To  ${url}
+##  ${synchro_url}=  ${url.replace("view", "json")}
+#  Go To  ${url.replace("view", "json")}
+#  Go To  ${url}
 
 
 Пошук тендера по ідентифікатору
@@ -1499,17 +1499,17 @@ Get Info From Complaints
   Click Element  xpath=//*[@id="slidePanel"]/descendant::*[contains(@href,"tender/view")]
   [Return]  ${value}
 
-Отримати інформацію із угоди
-  [Arguments]  ${username}  ${agreement_uaid}  ${field_name}
-  GovAuction.Отримати доступ до угоди  ${username}  ${agreement_uaid}
-  ${field_name}=  Set Variable If  '[' in '${field_name}'  ${field_name.split('[')[0]}${field_name.split(']')[1]}  ${field_name}
-  ${index}=  Set Variable If  '[' in '${field_name}'  ${field_name.split('[')[1].split(']')[0]}
-  ${index}=  Convert To Number  ${index}
-  ${value}=    Run Keyword If  'rationale' in '${field_name}'
-  ...  Get Text  xpath=(//*[@data-test-id="${field_name}"])[${index + 1}]
-#  ...  ELSE IF  'addend' in '${field_name}'  Get Text  xpath=//div[@class="panel-body"]
-  ...  ELSE  Get Text  xpath=//*[@data-test-id="${field_name}"]
-  [Return]  ${value}
+#Отримати інформацію із угоди
+#  [Arguments]  ${username}  ${agreement_uaid}  ${field_name}
+#  GovAuction.Отримати доступ до угоди  ${username}  ${agreement_uaid}
+#  ${field_name}=  Set Variable If  '[' in '${field_name}'  ${field_name.split('[')[0]}${field_name.split(']')[1]}  ${field_name}
+#  ${index}=  Set Variable If  '[' in '${field_name}'  ${field_name.split('[')[1].split(']')[0]}
+#  ${index}=  Convert To Number  ${index}
+#  ${value}=    Run Keyword If  'rationale' in '${field_name}'
+#  ...  Get Text  xpath=(//*[@data-test-id="${field_name}"])[${index + 1}]
+##  ...  ELSE IF  'addend' in '${field_name}'  Get Text  xpath=//div[@class="panel-body"]
+#  ...  ELSE  Get Text  xpath=//*[@data-test-id="${field_name}"]
+#  [Return]  ${value}
 
 
 ###############################################################################################################
@@ -1912,16 +1912,16 @@ Disqualification of the first winner
 #  ...  AND  Накласти ЄЦП на контракт
 
 
-GovAuction.Встановити ціну за одиницю для контракту
-  [Arguments]  ${username}  ${tender_uaid}  ${contract_data}
-  ${company_name}=  Set Variable  ${contract_data.data.suppliers[0].identifier.legalName}
-  GovAuction.Пошук тендера по ідентифікатору   ${username}  ${tender_uaid}
-  Дочекатися І Клікнути  xpath=//div[@id="slidePanel"]/descendant::a[contains(@href,"tender/award")]
-  Дочекатися І Клікнути  xpath=//div[contains(text(),"${company_name}")]/../descendant::button[contains(text(), "Ціна за одиницю")]
-  Wait Element Animation  xpath=//div[contains(text(), "${company_name}")]/ancestor::div[@class="modal-content"]/descendant::button[@class="mk-btn mk-btn_accept btn_submit_form"]
-  Input Text  xpath=//div[contains(text(), "${company_name}")]/ancestor::div[@class="modal-content"]/descendant::input[@class="unit-prices-value-amount"]  ${contract_data.data.unitPrices[0].value.amount}
-  Дочекатися І Клікнути  xpath=//div[contains(text(), "${company_name}")]/ancestor::div[@class="modal-content"]/descendant::button[@class="mk-btn mk-btn_accept btn_submit_form"]
-  Wait Until Keyword Succeeds  10 x  1 s  Element Should Be Visible  xpath=//div[contains(text(), "${company_name}")]/ancestor::div[@class="modal-content"]/descendant::button[@class="mk-btn mk-btn_accept btn_submit_form"]
+#GovAuction.Встановити ціну за одиницю для контракту
+#  [Arguments]  ${username}  ${tender_uaid}  ${contract_data}
+#  ${company_name}=  Set Variable  ${contract_data.data.suppliers[0].identifier.legalName}
+#  GovAuction.Пошук тендера по ідентифікатору   ${username}  ${tender_uaid}
+#  Дочекатися І Клікнути  xpath=//div[@id="slidePanel"]/descendant::a[contains(@href,"tender/award")]
+#  Дочекатися І Клікнути  xpath=//div[contains(text(),"${company_name}")]/../descendant::button[contains(text(), "Ціна за одиницю")]
+#  Wait Element Animation  xpath=//div[contains(text(), "${company_name}")]/ancestor::div[@class="modal-content"]/descendant::button[@class="mk-btn mk-btn_accept btn_submit_form"]
+#  Input Text  xpath=//div[contains(text(), "${company_name}")]/ancestor::div[@class="modal-content"]/descendant::input[@class="unit-prices-value-amount"]  ${contract_data.data.unitPrices[0].value.amount}
+#  Дочекатися І Клікнути  xpath=//div[contains(text(), "${company_name}")]/ancestor::div[@class="modal-content"]/descendant::button[@class="mk-btn mk-btn_accept btn_submit_form"]
+#  Wait Until Keyword Succeeds  10 x  1 s  Element Should Be Visible  xpath=//div[contains(text(), "${company_name}")]/ancestor::div[@class="modal-content"]/descendant::button[@class="mk-btn mk-btn_accept btn_submit_form"]
 
 
 GovAuction.Встановити ціну за одиницю для контракту
