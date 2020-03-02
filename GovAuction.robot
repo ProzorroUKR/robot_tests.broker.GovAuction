@@ -1924,10 +1924,10 @@ GovAuction.Встановити ціну за одиницю для контра
   Wait Until Keyword Succeeds  10 x  1 s  Element Should Be Visible  xpath=//div[contains(text(), "${company_name}")]/ancestor::div[@class="modal-content"]/descendant::button[@class="mk-btn mk-btn_accept btn_submit_form"]
 
 
-tenderonline.Встановити ціну за одиницю для контракту
+GovAuction.Встановити ціну за одиницю для контракту
   [Arguments]  ${username}  ${tender_uaid}  ${contract_data}
   ${company_name}=  Set Variable  ${contract_data.data.suppliers[0].identifier.legalName}
-  tenderonline.Пошук тендера по ідентифікатору   ${username}  ${tender_uaid}
+  GovAuction.Пошук тендера по ідентифікатору   ${username}  ${tender_uaid}
   Дочекатися І Клікнути  xpath=//div[@id="slidePanel"]/descendant::a[contains(@href,"tender/award")]
   Дочекатися І Клікнути  xpath=//div[contains(text(),"${company_name}")]/../descendant::button[contains(text(), "Ціна за одиницю")]
   Wait Element Animation  xpath=//div[contains(text(), "${company_name}")]/ancestor::div[@class="modal-content"]/descendant::button[@class="mk-btn mk-btn_accept btn_submit_form"]
@@ -1936,11 +1936,11 @@ tenderonline.Встановити ціну за одиницю для контр
   Wait Until Keyword Succeeds  10 x  1 s  Element Should Be Visible  xpath=//div[contains(text(), "${company_name}")]/ancestor::div[@class="modal-content"]/descendant::button[@class="mk-btn mk-btn_accept btn_submit_form"]
 
 
-tenderonline.Зареєструвати угоду
+GovAuction.Зареєструвати угоду
   [Arguments]  ${username}  ${tender_uaid}  ${period}
-  tenderonline.Пошук тендера по ідентифікатору   ${username}  ${tender_uaid}
-  ${startDate}=  convert_date_plan_to_ tenderonline_format  ${period['startDate']}
-  ${endDate}=  convert_date_plan_to_ tenderonline_format  ${period['endDate']}
+  GovAuction.Пошук тендера по ідентифікатору   ${username}  ${tender_uaid}
+  ${startDate}=  convert_date_plan_to_ GovAuction_format  ${period['startDate']}
+  ${endDate}=  convert_date_plan_to_ GovAuction_format  ${period['endDate']}
   Дочекатися І Клікнути  xpath=//div[@id="slidePanel"]/descendant::a[contains(@href,"tender/award")]
   Дочекатися І Клікнути  xpath=//button[@id="agreement-modal-info"]
   Wait Element Animation  xpath=//div[contains(text(), "Інформація по угоді")]/ancestor::div[@class="modal-content"]/descendant::button[@class="mk-btn mk-btn_accept btn_submit_form"]
@@ -1960,9 +1960,9 @@ tenderonline.Зареєструвати угоду
 #  [Return]  ${agreement_uaid}
 
 
-tenderonline.Пошук угоди по ідентифікатору
+GovAuction.Пошук угоди по ідентифікатору
   [Arguments]  ${username}  ${agreement_uaid}  ${save_key}=agreement_data
-  tenderonline.Пошук тендера по ідентифікатору   ${username}  ${agreement_uaid[0:-3]}
+  GovAuction.Пошук тендера по ідентифікатору   ${username}  ${agreement_uaid[0:-3]}
   Дочекатися І Клікнути  xpath=//div[@id="slidePanel"]/descendant::a[contains(@href,"tender/protokol")]
   Wait Until Element Is Visible  xpath=//*[contains(@href,"/agreements/view/")]  10
   Click Element  xpath=//*[contains(@href,"/agreements/view/")]
@@ -1971,12 +1971,12 @@ tenderonline.Пошук угоди по ідентифікатору
 
 Отримати доступ до угоди
   [Arguments]  ${username}  ${agreement_uaid}
-  tenderonline.Пошук угоди по ідентифікатору  ${username}  ${agreement_uaid}
+  GovAuction.Пошук угоди по ідентифікатору  ${username}  ${agreement_uaid}
 #  Wait Until Keyword Succeeds  10 x  1 s  Page Should Contain Element  xpath=//div[@class="col-xs-12 text-center"]/descendant::button[contains(text(),"Оголосити відбір для закупівлі за рамковою угодою")]
 
 Внести зміну в угоду
   [Arguments]  ${username}  ${agreement_uaid}  ${change_data}
-  tenderonline.Отримати доступ до угоди  ${username}  ${agreement_uaid}
+  GovAuction.Отримати доступ до угоди  ${username}  ${agreement_uaid}
   ${url}=  Get Location
   Wait Until Keyword Succeeds  30 x  5 s  Run Keywords
   ...  Force Agreement Synchronization  ${url}
@@ -1997,7 +1997,7 @@ tenderonline.Пошук угоди по ідентифікатору
 
 Оновити властивості угоди
   [Arguments]  ${username}  ${agreement_uaid}  ${data}
-  tenderonline.Отримати доступ до угоди  ${username}  ${agreement_uaid}
+  GovAuction.Отримати доступ до угоди  ${username}  ${agreement_uaid}
   ${is_addend}=  Run Keyword And Return Status  Dictionary Should Contain Key  ${data.data.modifications[0]}  addend
   ${is_factor}=  Run Keyword And Return Status  Dictionary Should Contain Key  ${data.data.modifications[0]}  factor
 #  ${value_addend}=  Set Variable If  ${is_addend}  ${data.data.modifications[0].addend}
@@ -2019,7 +2019,7 @@ tenderonline.Пошук угоди по ідентифікатору
 
 Завантажити документ для зміни у рамковій угоді
   [Arguments]  ${username}  ${filepath}  ${agreement_uaid}  ${item_id}
-  tenderonline.Отримати доступ до угоди  ${username}  ${agreement_uaid}
+  GovAuction.Отримати доступ до угоди  ${username}  ${agreement_uaid}
   Wait Until Keyword Succeeds  10 x  1 s  Page Should Contain Element  xpath=//a[contains(@class, "mk-btn mk-btn_default") and contains(text(),"Редагувати зміни")]
   Click Element  xpath=//a[contains(@class, "mk-btn mk-btn_default") and contains(text(),"Редагувати зміни")]
   Choose File  xpath=//input[@name="FileUpload[file][]"]  ${filepath}
@@ -2030,7 +2030,7 @@ tenderonline.Пошук угоди по ідентифікатору
 
 Застосувати зміну для угоди
   [Arguments]  ${username}  ${agreement_uaid}  ${dateSigned}  ${status}
-  tenderonline.Отримати доступ до угоди  ${username}  ${agreement_uaid}
+  GovAuction.Отримати доступ до угоди  ${username}  ${agreement_uaid}
   ${url}=  Get Location
   Run Keyword If  '${status}' == 'active'  Run Keywords
   ...  Wait Until Keyword Succeeds  10 x  1 s  Element Should Be Visible  xpath=//button[@class="mk-btn mk-btn_accept js-btn-agreement-action"]
