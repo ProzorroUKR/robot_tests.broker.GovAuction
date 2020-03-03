@@ -215,6 +215,12 @@ def adapt_view_item_data(value, field_name):
     return convert_string_from_dict_GovAuction(value)
 
 
+def adapt_view_agreement_data(value, field_name):
+    if 'factor' in field_name:
+        value = round(float((value + 1) / 10, 1))
+    return convert_string_from_dict_GovAuction(value)
+
+
 def get_related_elem_description(tender_data, feature, item_id):
     if item_id == "":
         for elem in tender_data['data']['{}s'.format(feature['featureOf'])]:

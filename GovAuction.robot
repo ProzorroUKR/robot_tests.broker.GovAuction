@@ -311,7 +311,7 @@ Update plan items info
 #  Run Keyword If  "aboveThreshold" in "${tender_data.data.procurementMethodType}"  Conv And Select From List By Value  xpath=(//select[@id="guarantee-exist"])[3]  1
 #  ...  ELSE  Conv And Select From List By Value  xpath=(//select[@id="guarantee-exist"])[1]  1
 #  Conv And Select From List By Value  xpath=(//*[@data-test-id="guarantee-exist"])[${index_strategy}]  1
-  Run Keyword If  '${mode}' == 'open_framework'  Execute Javascript  document.querySelector('[name="fast_forward"]').checked
+#  Run Keyword If  '${mode}' == 'open_framework'  Execute Javascript  document.querySelector('[name="fast_forward"]').checked
 
 #  Wait Until Keyword Succeeds  10 x  1 s  Check It  document.querySelector('[name="fast_forward"]').setAttribute("checked", 'checked');
 
@@ -709,12 +709,12 @@ Go To And Assert
   ${current_url}=  Get Location
   Should Be Equal  ${url}  ${current_url}
 
-Force agreement synchronization
-  [Arguments]  ${url}
-  Go To  ${url}
-#  ${synchro_url}=  ${url.replace("view", "json")}
-  Go To  ${url.replace("view", "json")}
-  Go To  ${url}
+#Force agreement synchronization
+#  [Arguments]  ${url}
+#  Go To  ${url}
+##  ${synchro_url}=  ${url.replace("view", "json")}
+#  Go To  ${url.replace("view", "json")}
+#  Go To  ${url}
 
 
 Пошук тендера по ідентифікатору
@@ -801,6 +801,7 @@ GovAuction.Активувати другий етап
   GovAuction.Пошук тендера по ідентифікатору  ${username}  ${tenderID}
   Дочекатися І Клікнути  xpath=//a[contains(text(),'Редагувати')]
   Run Keyword If  "Date" in "${field_name}"  Input Date  name="Tender[${field_name.replace(".", "][")}]"  ${field_value}
+  ...  ELSE IF  'items[0].quantity' in '${field_name}' and '${mode}' == 'framework_selection'  ConvToStr And Input Text  xpath=//input[@id="item-0-quantity"]  ${field_value}
   ...  ELSE  Input text  name=Tender[${field_name}]  ${field_value}
   Дочекатися І Клікнути  xpath=//button[contains(@class,'btn_submit_form')]
   Wait Until Page Contains Element  xpath=//div[contains(@class, "alert-success")]
@@ -1283,7 +1284,7 @@ Get Info From Agreements
   [Arguments]  ${username}  ${tender_uaid}  ${field_name}
   ${field_name}=  Set Variable If  '[' in '${field_name}'  ${field_name.split('[')[0]}${field_name.split(']')[1]}  ${field_name}
   GovAuction.Пошук тендера по ідентифікатору   ${username}  ${tender_uaid}
-  Дочекатися І Клікнути  xpath=//div[@id="slidePanel"]/descendant::a[contains(@href,"tender/protokol")]
+  Run Keyword If  '${mode}' != 'framework_selection'  Дочекатися І Клікнути  xpath=//div[@id="slidePanel"]/descendant::a[contains(@href,"tender/protokol")]
 #  Run Keyword If  "${TEST NAME}" == "Відображення статусу зареєстрованої угоди"
 #  ...  ${status}=  Run Keyword And Return Status  Page Should Contain Element  xpath=//div[@class="col-xs-12 col-sm-6 col-md-8 item-bl_val"][contains(text(),"Укладена рамкова угода")]
   ${status}=  Run Keyword If  "${TEST NAME}" == "Відображення статусу зареєстрованої угоди"  Run Keyword And Return Status  Page Should Contain Element  xpath=//div[@class="col-xs-12 col-sm-6 col-md-8 item-bl_val"][contains(text(),"Укладена рамкова угода")]
@@ -1306,13 +1307,31 @@ Get Info From Agreements
   ${value}=  adapt_view_item_data  ${value}  ${field_name}
   [Return]  ${value}
 
+Отримати інформацію із угоди
+  [Arguments]  ${username}  ${agreement_uaid}  ${field_name}
+  GovAuction.Отримати доступ до угоди  ${username}  ${agreement_uaid}
+  ${index}=  Set Variable If  '[' in '${field_name}'  ${field_name.split('[')[1].split(']')[0]}
+  ${index}=  Run Keyword If  '[' in '${field_name}'  Convert To Integer  ${index}
+#  ${field_name}=  Set Variable If  '[' in '${field_name}'  ${field_name.split('[')[0]}${field_name.split(']')[1]}  ${field_name}
+  ${field_name}=  Remove String Using Regexp  ${field_name}  \\[(\\d+)\\]
+#  ${value}=    Run Keyword If  'rationale' in '${field_name}'
+#  ...  Get Text  xpath=(//*[@data-test-id="${field_name}"])[${index + 1}]
+##  ...  ELSE IF  'addend' in '${field_name}'  Get Text  xpath=//div[@class="panel-body"]
+#  ...  ELSE  Get Text  xpath=//*[@data-test-id="${field_name}"]
+  ${value}=  Run Keyword If  'factor' in '${field_name}'
+  ...  Get Text  xpath=(//*[@data-test-id="${field_name}"])[${index}]
+  ...  ELSE  Get Text  xpath=(//*[@data-test-id="${field_name}"])[${index + 1}]
+  ${value}=  Run Keyword If  "addend" in "${field_name}"  Convert To Number  ${value}
+  ...  ELSE IF  "factor" in "${field_name}"  Convert To Number  ${value}
+  ...  ELSE  Set Variable  ${value}
+  ${value}=  adapt_view_agreement_data  ${value}  ${field_name}
+  [Return]  ${value}
+
 Отримати інформацію із лоту
   [Arguments]  ${username}  ${tender_uaid}  ${lot_id}  ${field_name}
   ${red}=  Evaluate  "\\033[1;31m"
 #  ${value}=  Run Keyword If  'minimalStep' in '${field_name}' and 'TaxIncluded' not in '${field_name}'  Get Text  xpath=//*[@data-test-id="lots.minimalStep.amount"]
-#  ...  ELSE IF  'value' in '${field_name}'  Get Text  xpath=//*[contains(text(),"${lot_id}")]/ancestor::div[@class="item-inf_txt"]/descendant::*[@data-test-id='lots.value.amount']
-#  ...  ELSE IF  'lots[0].auctionPeriod.startDate' in '${field_name}'  Get Text  xpath=//*[@data-test-id="${field_name.replace('[0]', '')}"]
-#  ...  ELSE  Get Text  xpath=//*[contains(text(),"${lot_id}")]/ancestor::div[@class="item-inf_txt"]/descendant::*[@data-test-id='lots.${field_name}']
+##  ...  ELSE IF  'value.amount' in '${field_name}'  Get Text  xpath=//*[contains(text(),"${lot_id}")]/ancestor::div[@class="item-inf_txt"]/descendant::*[@data-test-id='lots.value.amount']
   ${value}=  Run Keyword If  'value.valueAddedTaxIncluded' in '${field_name}'  Get Text  xpath=//*[contains(text(),"${lot_id}")]/ancestor::div[@class="item-inf_txt"]/descendant::*[@data-test-id="value.valueAddedTaxIncluded"]
   ...  ELSE IF  'lots[0].auctionPeriod.startDate' in '${field_name}'  Get Text  xpath=//*[@data-test-id="${field_name.replace('[0]', '')}"]
   ...  ELSE IF  'minimalStep.valueAddedTaxIncluded' in '${field_name}'  Get Text  xpath=//*[contains(text(),"${lot_id}")]/ancestor::div[@class="item-inf_txt"]/descendant::*[@data-test-id="value.valueAddedTaxIncluded"]
@@ -1478,17 +1497,17 @@ Get Info From Complaints
   Click Element  xpath=//*[@id="slidePanel"]/descendant::*[contains(@href,"tender/view")]
   [Return]  ${value}
 
-Отримати інформацію із угоди
-  [Arguments]  ${username}  ${agreement_uaid}  ${field_name}
-  GovAuction.Отримати доступ до угоди  ${username}  ${agreement_uaid}
-  ${field_name}=  Set Variable If  '[' in '${field_name}'  ${field_name.split('[')[0]}${field_name.split(']')[1]}  ${field_name}
-  ${index}=  Set Variable If  '[' in '${field_name}'  ${field_name.split('[')[1].split(']')[0]}
-  ${index}=  Convert To Number  ${index}
-  ${value}=    Run Keyword If  'rationale' in '${field_name}'
-  ...  Get Text  xpath=(//*[@data-test-id="${field_name}"])[${index + 1}]
-#  ...  ELSE IF  'addend' in '${field_name}'  Get Text  xpath=//div[@class="panel-body"]
-  ...  ELSE  Get Text  xpath=//*[@data-test-id="${field_name}"]
-  [Return]  ${value}
+#Отримати інформацію із угоди
+#  [Arguments]  ${username}  ${agreement_uaid}  ${field_name}
+#  GovAuction.Отримати доступ до угоди  ${username}  ${agreement_uaid}
+#  ${field_name}=  Set Variable If  '[' in '${field_name}'  ${field_name.split('[')[0]}${field_name.split(']')[1]}  ${field_name}
+#  ${index}=  Set Variable If  '[' in '${field_name}'  ${field_name.split('[')[1].split(']')[0]}
+#  ${index}=  Convert To Number  ${index}
+#  ${value}=    Run Keyword If  'rationale' in '${field_name}'
+#  ...  Get Text  xpath=(//*[@data-test-id="${field_name}"])[${index + 1}]
+##  ...  ELSE IF  'addend' in '${field_name}'  Get Text  xpath=//div[@class="panel-body"]
+#  ...  ELSE  Get Text  xpath=//*[@data-test-id="${field_name}"]
+#  [Return]  ${value}
 
 
 ###############################################################################################################
@@ -1891,6 +1910,18 @@ Disqualification of the first winner
 #  ...  AND  Накласти ЄЦП на контракт
 
 
+#GovAuction.Встановити ціну за одиницю для контракту
+#  [Arguments]  ${username}  ${tender_uaid}  ${contract_data}
+#  ${company_name}=  Set Variable  ${contract_data.data.suppliers[0].identifier.legalName}
+#  GovAuction.Пошук тендера по ідентифікатору   ${username}  ${tender_uaid}
+#  Дочекатися І Клікнути  xpath=//div[@id="slidePanel"]/descendant::a[contains(@href,"tender/award")]
+#  Дочекатися І Клікнути  xpath=//div[contains(text(),"${company_name}")]/../descendant::button[contains(text(), "Ціна за одиницю")]
+#  Wait Element Animation  xpath=//div[contains(text(), "${company_name}")]/ancestor::div[@class="modal-content"]/descendant::button[@class="mk-btn mk-btn_accept btn_submit_form"]
+#  Input Text  xpath=//div[contains(text(), "${company_name}")]/ancestor::div[@class="modal-content"]/descendant::input[@class="unit-prices-value-amount"]  ${contract_data.data.unitPrices[0].value.amount}
+#  Дочекатися І Клікнути  xpath=//div[contains(text(), "${company_name}")]/ancestor::div[@class="modal-content"]/descendant::button[@class="mk-btn mk-btn_accept btn_submit_form"]
+#  Wait Until Keyword Succeeds  10 x  1 s  Element Should Be Visible  xpath=//div[contains(text(), "${company_name}")]/ancestor::div[@class="modal-content"]/descendant::button[@class="mk-btn mk-btn_accept btn_submit_form"]
+
+
 GovAuction.Встановити ціну за одиницю для контракту
   [Arguments]  ${username}  ${tender_uaid}  ${contract_data}
   ${company_name}=  Set Variable  ${contract_data.data.suppliers[0].identifier.legalName}
@@ -1933,6 +1964,8 @@ GovAuction.Пошук угоди по ідентифікатору
   Дочекатися І Клікнути  xpath=//div[@id="slidePanel"]/descendant::a[contains(@href,"tender/protokol")]
   Wait Until Element Is Visible  xpath=//*[contains(@href,"/agreements/view/")]  10
   Click Element  xpath=//*[contains(@href,"/agreements/view/")]
+  ${url}=  Get Location
+  Force Agreement Synchronization  ${url}
 
 Отримати доступ до угоди
   [Arguments]  ${username}  ${agreement_uaid}
@@ -1988,6 +2021,7 @@ GovAuction.Пошук угоди по ідентифікатору
   Wait Until Keyword Succeeds  10 x  1 s  Page Should Contain Element  xpath=//a[contains(@class, "mk-btn mk-btn_default") and contains(text(),"Редагувати зміни")]
   Click Element  xpath=//a[contains(@class, "mk-btn mk-btn_default") and contains(text(),"Редагувати зміни")]
   Choose File  xpath=//input[@name="FileUpload[file][]"]  ${filepath}
+  Wait Until Keyword Succeeds  10 x  1 s  Element Should Be Visible  xpath=(//div[@class="document"]/descendant::select[@class="document-type"])[last()]
   Select From List By Value  xpath=(//div[@class="document"]/descendant::select[@class="document-type"])[last()]  notice
   Click Button  xpath=//button[@id="submit-agreement"]
   Дочекатися завантаження документу
@@ -1997,14 +2031,21 @@ GovAuction.Пошук угоди по ідентифікатору
   GovAuction.Отримати доступ до угоди  ${username}  ${agreement_uaid}
   ${url}=  Get Location
   Run Keyword If  '${status}' == 'active'  Run Keywords
-  ...  Wait Until Keyword Succeeds  10 x  1 s  Page Should Contain Element  xpath=//button[@class="mk-btn mk-btn_accept js-btn-agreement-action"]
+  ...  Wait Until Keyword Succeeds  10 x  1 s  Element Should Be Visible  xpath=//button[@class="mk-btn mk-btn_accept js-btn-agreement-action"]
   ...  AND  Click Button  xpath=//button[@class="mk-btn mk-btn_accept js-btn-agreement-action"]
-  ...  ELSE  Дочекатися І Клікнути  xpath=//button[@class="mk-btn mk-btn_danger js-btn-agreement-action"]
+  ...  ELSE  Run Keywords
+  ...  Wait Until Keyword Succeeds  10 x  1 s  Element Should Be Visible  xpath=//button[@class="mk-btn mk-btn_danger js-btn-agreement-action"]
+  ...  AND  Click Button  xpath=//button[@class="mk-btn mk-btn_danger js-btn-agreement-action"]
   Wait Element Animation  xpath=//button[@class="btn mk-btn mk-btn_accept"]
   Click Button  xpath=//button[@class="btn mk-btn mk-btn_accept"]
   Wait Until Keyword Succeeds  30 x  5 s  Run Keywords
   ...  Force Agreement Synchronization  ${url}
-  ...  AND  Wait Until Page Contains Element  xpath=//a[contains(@href, "/buyer/agreements/update/")]
+  ...  AND  Wait Until Page Contains Element  xpath=//button[contains(@class, "sign_btn mk-btn mk-btn_default") and contains(text(),"Накласти ЕЦП/КЕП")]
+  Накласти ЄЦП  ${False}
+#  Wait Until Keyword Succeeds  10 x  1 s  Page Should Contain Element  xpath=//button[contains(text(),"Оголосити відбір для закупівлі")]
+  Wait Until Keyword Succeeds  30 x  5 s  Run Keywords
+  ...  Force Agreement Synchronization  ${url}
+  ...  AND  Wait Until Page Contains Element  xpath=//button[contains(text(),"Оголосити відбір для закупівлі")]
 
 
 
@@ -2133,6 +2174,14 @@ Position Should Equals
   ${status}=  Run Keyword And Return Status  Should Be Equal  ${prev_vert_pos}  ${current_vert_pos}
   Set Test Variable  ${prev_vert_pos}  ${current_vert_pos}
   Should Be True  ${status}
+
+Force agreement synchronization
+  [Arguments]  ${url}
+  Go To  ${url}
+#  ${synchro_url}=  ${url.replace("view", "json")}
+  Go To  ${url.replace("view", "json")}
+  Go To  ${url}
+
 
 Закрити модалку
   [Arguments]  ${locator}
