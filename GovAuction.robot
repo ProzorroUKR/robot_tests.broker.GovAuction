@@ -1289,7 +1289,7 @@ Get Info From Agreements
 #  ...  ${status}=  Run Keyword And Return Status  Page Should Contain Element  xpath=//div[@class="col-xs-12 col-sm-6 col-md-8 item-bl_val"][contains(text(),"Укладена рамкова угода")]
   ${status}=  Run Keyword If  "${TEST NAME}" == "Відображення статусу зареєстрованої угоди"  Run Keyword And Return Status  Page Should Contain Element  xpath=//div[@class="col-xs-12 col-sm-6 col-md-8 item-bl_val"][contains(text(),"Укладена рамкова угода")]
   ${value}=  Run Keyword If  'agreementID' in '${field_name}'
-  ...  Get Text  xpath=//div[@data-test-id="agreement.agreementID"]
+  ...  Get Text  xpath=//a[@data-test-id="agreement.agreementID"]
   ...  ELSE  Get Text  xpath=//*[@data-test-id="${field_name}"]
   ${value}=  Set Variable If  ${status}  active  ${value}
   [Return]  ${value}
