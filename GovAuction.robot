@@ -1331,9 +1331,7 @@ Get Info From Agreements
   [Arguments]  ${username}  ${tender_uaid}  ${lot_id}  ${field_name}
   ${red}=  Evaluate  "\\033[1;31m"
 #  ${value}=  Run Keyword If  'minimalStep' in '${field_name}' and 'TaxIncluded' not in '${field_name}'  Get Text  xpath=//*[@data-test-id="lots.minimalStep.amount"]
-#  ...  ELSE IF  'value' in '${field_name}'  Get Text  xpath=//*[contains(text(),"${lot_id}")]/ancestor::div[@class="item-inf_txt"]/descendant::*[@data-test-id='lots.value.amount']
-#  ...  ELSE IF  'lots[0].auctionPeriod.startDate' in '${field_name}'  Get Text  xpath=//*[@data-test-id="${field_name.replace('[0]', '')}"]
-#  ...  ELSE  Get Text  xpath=//*[contains(text(),"${lot_id}")]/ancestor::div[@class="item-inf_txt"]/descendant::*[@data-test-id='lots.${field_name}']
+##  ...  ELSE IF  'value.amount' in '${field_name}'  Get Text  xpath=//*[contains(text(),"${lot_id}")]/ancestor::div[@class="item-inf_txt"]/descendant::*[@data-test-id='lots.value.amount']
   ${value}=  Run Keyword If  'value.valueAddedTaxIncluded' in '${field_name}'  Get Text  xpath=//*[contains(text(),"${lot_id}")]/ancestor::div[@class="item-inf_txt"]/descendant::*[@data-test-id="value.valueAddedTaxIncluded"]
   ...  ELSE IF  'lots[0].auctionPeriod.startDate' in '${field_name}'  Get Text  xpath=//*[@data-test-id="${field_name.replace('[0]', '')}"]
   ...  ELSE IF  'minimalStep.valueAddedTaxIncluded' in '${field_name}'  Get Text  xpath=//*[contains(text(),"${lot_id}")]/ancestor::div[@class="item-inf_txt"]/descendant::*[@data-test-id="value.valueAddedTaxIncluded"]
